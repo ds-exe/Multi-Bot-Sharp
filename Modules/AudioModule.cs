@@ -1,15 +1,7 @@
-﻿using System.Runtime.InteropServices;
-
-namespace Multi_Bot_Sharp.Modules
+﻿namespace Multi_Bot_Sharp.Modules
 {
     internal class AudioModule : BaseCommandModule
     {
-        [Command("test")]
-        public async Task Test(CommandContext ctx)
-        {
-            await ctx.RespondAsync("Greetings! UwU");
-        }
-
         [Command("join")]
         public async Task JoinAsync(CommandContext ctx)
         {
@@ -35,9 +27,10 @@ namespace Multi_Bot_Sharp.Modules
         }
 
         [Command("play")]
-        public async Task Play(CommandContext ctx, string query)
+        public async Task Play(CommandContext ctx, params string[] queryArray)
         {
-            Console.WriteLine(query);
+            var query = string.Join(" ", queryArray);
+
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
                 await ctx.RespondAsync("You are not in a voice channel.");

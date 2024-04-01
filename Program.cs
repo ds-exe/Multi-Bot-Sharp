@@ -1,11 +1,7 @@
-﻿using System.Reflection;
-
-namespace Multi_Bot_Sharp
+﻿namespace Multi_Bot_Sharp
 {
     internal class Program
     {
-        private static AudioModule _audioModule;
-
         static void Main(string[] args)
         {
             MainAsync().GetAwaiter().GetResult();
@@ -54,54 +50,20 @@ namespace Multi_Bot_Sharp
             {
                 StringPrefixes = new List<string> { config.Prefix }
             });
-            //commands.RegisterCommands(Assembly.GetExecutingAssembly());
+
             commands.RegisterCommands<AudioModule>();
 
             await discord.ConnectAsync();
-            await lavalink.ConnectAsync(lavalinkConfig);
-
-            //var services = ConfigureServices(discord);
-            //InitialiseModules(services);
-
-            //discord.MessageCreated += async (s, e) =>
-            //{
-
-            //    if (!e.Message.Author.IsBot && e.Message.Content.ToLower().StartsWith(config.Token))
-            //    {
-            //        var data = e.Message.Content.Substring(config.Token.Length);
-            //        var parameterList = data.Split(" ");
-
-            //        await HandleCommand(e.Message, parameterList.First(), parameterList.Skip(1).ToList());
-            //    }
-            //};
+            try
+            {
+                await lavalink.ConnectAsync(lavalinkConfig);
+            }
+            catch
+            {
+                Console.WriteLine("Lavalink connection error.");
+            }
 
             await Task.Delay(-1);
         }
-
-        //static async Task HandleCommand(DiscordMessage message, string command, List<string> parameters)
-        //{
-        //    switch (command)
-        //    {
-        //        case "play":
-        //            _audioModule.Play(message, parameters);
-        //            break;
-        //        default:
-        //            await message.RespondAsync("Unknown command");
-        //            break;
-        //    }
-        //}
-
-        //static void InitialiseModules(ServiceProvider services)
-        //{
-        //    _audioModule = services.GetRequiredService<AudioModule>();
-        //}
-
-        //static ServiceProvider ConfigureServices(DiscordClient discord)
-        //{
-        //    return new ServiceCollection()
-        //        .AddSingleton(discord)
-        //        .AddSingleton<AudioModule>()
-        //        .BuildServiceProvider();
-        //}
     }
 }
