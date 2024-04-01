@@ -1,0 +1,13 @@
+﻿global using DisCatSharp;
+global using DisCatSharp.Enums;
+global using Multi_Bot.Models;
+global using System.Text.Json;
+global using DisCatSharp.CommandsNext;
+global using DisCatSharp.Entities;
+global using DisCatSharp.Lavalink;
+global using Microsoft.Extensions.DependencyInjection;
+global using DisCatSharp.Net;
+global using Multi_Bot_Sharp.Modules;
+global using DisCatSharp.CommandsNext.Attributes;
+global using DisCatSharp.Lavalink.Entities;
+global using DisCatSharp.Lavalink.Enums;
