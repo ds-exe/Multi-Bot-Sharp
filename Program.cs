@@ -52,6 +52,8 @@
             });
 
             commands.RegisterCommands<AudioModule>();
+            commands.RegisterCommands<TimeModule>();
+            commands.RegisterCommands<ResinModule>();
 
             await discord.ConnectAsync();
             try

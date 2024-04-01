@@ -1,16 +1,16 @@
-﻿namespace Multi_Bot_Sharp.Modules
+﻿using DisCatSharp.Entities;
+
+namespace Multi_Bot_Sharp.Modules
 {
     internal class AudioModule : BaseCommandModule
     {
-        [Command("join")]
-        public async Task JoinAsync(CommandContext ctx)
+        private async Task<bool> JoinAsync(CommandContext ctx)
         {
-            //await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
             var lavalink = ctx.Client.GetLavalink();
             if (!lavalink.ConnectedSessions.Any())
             {
                 await ctx.RespondAsync("The Lavalink connection is not established");
-                return;
+                return false;
             }
 
             var session = lavalink.ConnectedSessions.Values.First();
@@ -19,11 +19,11 @@
             if (channel.Type != ChannelType.Voice && channel.Type != ChannelType.Stage)
             {
                 await ctx.RespondAsync("Not a valid voice channel.");
-                return;
+                return false;
             }
 
             await session.ConnectAsync(channel);
-            await ctx.RespondAsync($"Joined {channel.Mention}!");
+            return true;
         }
 
         [Command("play")]
@@ -36,6 +36,12 @@
                 await ctx.RespondAsync("You are not in a voice channel.");
                 return;
             }
+
+            if (!JoinAsync(ctx).Result)
+            {
+                return;
+            }
+
             var lavalink = ctx.Client.GetLavalink();
             var guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
 

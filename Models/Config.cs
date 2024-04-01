@@ -1,4 +1,4 @@
-﻿namespace Multi_Bot.Models
+﻿namespace Multi_Bot_Sharp.Models
 {
     public class Config
     {
