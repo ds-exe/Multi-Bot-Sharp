@@ -46,14 +46,19 @@
 
             var lavalink = discord.UseLavalink();
 
+            var services = new ServiceCollection()
+                .AddSingleton<EmbedModule>()
+                .BuildServiceProvider();
+
             var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
             {
-                StringPrefixes = new List<string> { config.Prefix }
+                StringPrefixes = new List<string> { config.Prefix },
+                ServiceProvider = services
             });
 
-            commands.RegisterCommands<AudioModule>();
-            commands.RegisterCommands<TimeModule>();
-            commands.RegisterCommands<ResinModule>();
+            commands.RegisterCommands(Assembly.GetExecutingAssembly());
+
+            commands.SetHelpFormatter<CustomHelpFormatter>();
 
             await discord.ConnectAsync();
             try

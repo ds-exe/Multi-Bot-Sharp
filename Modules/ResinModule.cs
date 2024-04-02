@@ -1,6 +1,6 @@
 ﻿namespace Multi_Bot_Sharp.Modules
 {
-    internal class ResinModule : BaseCommandModule
+    public class ResinModule : BaseCommandModule
     {
         private readonly Dictionary<string, Game> games = new Dictionary<string, Game>()
         {

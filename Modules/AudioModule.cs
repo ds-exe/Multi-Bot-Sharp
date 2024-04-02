@@ -1,8 +1,6 @@
-﻿using DisCatSharp.Entities;
-
-namespace Multi_Bot_Sharp.Modules
+﻿namespace Multi_Bot_Sharp.Modules
 {
-    internal class AudioModule : BaseCommandModule
+    public class AudioModule : BaseCommandModule
     {
         private async Task<bool> JoinAsync(CommandContext ctx)
         {
@@ -27,9 +25,10 @@ namespace Multi_Bot_Sharp.Modules
         }
 
         [Command("play")]
-        public async Task Play(CommandContext ctx, params string[] queryArray)
+        [Description("Plays music")]
+        public async Task Play(CommandContext ctx, [RemainingText] string query)
         {
-            var query = string.Join(" ", queryArray);
+            //var query = string.Join(" ", queryArray);
 
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
