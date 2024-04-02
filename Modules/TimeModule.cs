@@ -11,43 +11,88 @@
         }
 
         [Command("time")]
-        public async Task Time(CommandContext ctx, [Description("")] DateTime time, string timezone = "utc")
+        [Description("Get an embed for a given time/date, optional timezone")]
+        public async Task Time(CommandContext ctx, [Description("time - hh:mm")] DateTime datetime, [Description("optional - region/city or abbreviation")] string timezone = "utc")
         {
-            try
-            {
-                var zone = TZConvert.GetTimeZoneInfo(timezone);
-                var timestamp = TimeZoneInfo.ConvertTimeToUtc(time, zone).Timestamp(TimestampFormat.LongDateTime);
-                await ctx.RespondAsync(EmbedModule.GetTimestampEmbed(timestamp));
-            }
-            catch (TimeZoneNotFoundException e)
-            {
-                await ctx.RespondAsync("Invalid timezone");
-            }
+            await SendTimeEmbed(ctx, datetime, timezone, TimestampFormat.LongDateTime);
         }
 
-        //[Command("time")]
-
+        [Command("time")]
+        public async Task Time(CommandContext ctx, [Description("time - hh:mm")] string time, [Description("date - dd/mm or dd/mm/yyyy")] string date, [Description("optional - region/city or abbreviation")] string timezone)
+        {
+            await SendTimeEmbed(ctx, time, date, timezone, TimestampFormat.LongDateTime);
+        }
 
         [Command("until")]
-        public async Task Until(CommandContext ctx, [RemainingText][Description("")] string query)
+        [Description("Get an embed for a given time/date, optional timezone")]
+        public async Task Until(CommandContext ctx, [Description("time - hh:mm")] DateTime datetime, [Description("optional - region/city or abbreviation")] string timezone = "utc")
         {
-            // need to process timezone with paramter
-            var time = DateTime.UtcNow.Timestamp();
-            await ctx.RespondAsync(EmbedModule.GetTimestampEmbed(time));
+            await SendTimeEmbed(ctx, datetime, timezone, TimestampFormat.RelativeTime);
+        }
+
+        [Command("until")]
+        public async Task Until(CommandContext ctx, [Description("time - hh:mm")] string time, [Description("date - dd/mm or dd/mm/yyyy")] string date, [Description("optional - region/city or abbreviation")] string timezone)
+        {
+            await SendTimeEmbed(ctx, time, date, timezone, TimestampFormat.RelativeTime);
+        }
+
+        private async Task SendTimeEmbed(CommandContext ctx, DateTime datetime, string timezone, TimestampFormat format)
+        {
+            var zone = GetTimeZone(timezone);
+            if (zone == null)
+            {
+                await ctx.RespondAsync("Invalid timezone");
+                return;
+            }
+
+            var timestamp = TimeZoneInfo.ConvertTimeToUtc(datetime, zone).Timestamp(format);
+            await ctx.RespondAsync(EmbedModule.GetTimestampEmbed(timestamp));
         }
 
         [Command("now")]
         [Description("Gets the time for a given timezone")]
         public async Task Now(CommandContext ctx, [Description("Optional timezone, default UTC")] string timezone = "utc")
         {
+            var zone = GetTimeZone(timezone);
+            if (zone == null)
+            {
+                await ctx.RespondAsync("Invalid timezone");
+                return;
+            }
+
+            await ctx.RespondAsync($"`{TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zone).ToString("dd MMM yyyy, HH:mm")}`");
+        }
+
+        private async Task SendTimeEmbed(CommandContext ctx, string date, string time, string timezone, TimestampFormat format)
+        {
+            if (date.Count(c => c == '/') == 1)
+            {
+                date += "/" + DateTime.UtcNow.Year;
+            }
+            var success = DateTime.TryParse(time + " " + date, out var datetime);
+            if (!success)
+            {
+                return;
+            }
+
+            await SendTimeEmbed(ctx, datetime, timezone, format);
+        }
+
+        private TimeZoneInfo GetTimeZone(string timezone)
+        {
             try
             {
-                var zone = TZConvert.GetTimeZoneInfo(timezone);
-                await ctx.RespondAsync($"`{TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zone).ToString("dd MMM yyyy, HH:mm")}`");
+                var success = timezones.TryGetValue(timezone, out var result);
+                if (!success || result == null)
+                {
+                    return TZConvert.GetTimeZoneInfo(timezone);
+                }
+
+                return TZConvert.GetTimeZoneInfo(result);
             }
             catch (TimeZoneNotFoundException e)
             {
-                await ctx.RespondAsync("Invalid timezone");
+                return null;
             }
         }
 
