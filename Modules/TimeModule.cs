@@ -19,8 +19,15 @@
         [Command("now")]
         public async Task Now(CommandContext ctx, string timezone = "utc")
         {
-            var zone = TimeZoneInfo.GetSystemTimeZones().First(t => t.DisplayName.ToLower().Contains(timezone.ToLower()));
-            await ctx.RespondAsync($"`{TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zone).ToString("dd MMM yyyy, HH:mm")}`");
+            try
+            {
+                var zone = TZConvert.GetTimeZoneInfo(timezone);
+                await ctx.RespondAsync($"`{TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zone).ToString("dd MMM yyyy, HH:mm")}`");
+            }
+            catch (TimeZoneNotFoundException e)
+            {
+                await ctx.RespondAsync("Invalid timezone");
+            }
         }
 
         public static string GenerateUnixTimeNow()
