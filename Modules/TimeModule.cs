@@ -1,24 +1,12 @@
-﻿using System;
-
-namespace Multi_Bot_Sharp.Modules
+﻿namespace Multi_Bot_Sharp.Modules
 {
     public class TimeModule : BaseCommandModule
     {
-        public EmbedModule EmbedModule { private get; set; }
-
         private Dictionary<string, string> timezones;
 
         public TimeModule()
         {
-            string cwd = Directory.GetCurrentDirectory();
-            string path = cwd + @"/timezones.json";
-
-            #if DEBUG
-            path = cwd + @"/../../../timezones.json";
-            #endif
-
-            string text = File.ReadAllText(path);
-
+            var text = UtilityModule.GetJsonText("timezones");
             timezones = JsonSerializer.Deserialize<Dictionary<string, string>>(text) ?? new();
         }
 

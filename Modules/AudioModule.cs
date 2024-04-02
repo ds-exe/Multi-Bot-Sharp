@@ -28,8 +28,6 @@
         [Description("Plays music")]
         public async Task Play(CommandContext ctx, [RemainingText] string query)
         {
-            //var query = string.Join(" ", queryArray);
-
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
                 await ctx.RespondAsync("You are not in a voice channel.");

@@ -2,12 +2,8 @@
 {
     public class CustomHelpFormatter : DefaultHelpFormatter
     {
-        public EmbedModule EmbedModule { private get; set; }
-
         private const ulong creatorID = 74968333413257216;
-
         private DiscordUser User;
-
         private string EmbedThumbnail;
 
         public CustomHelpFormatter(CommandContext ctx) : base(ctx)
@@ -26,16 +22,7 @@
         private async Task InitialiseEmbeds(DiscordClient client)
         {
             User = await client.GetUserAsync(creatorID);
-
-            string cwd = Directory.GetCurrentDirectory();
-            string path = cwd + @"/config.json";
-
-            #if DEBUG
-            path = cwd + @"/../../../config.json";
-            #endif
-
-            string text = File.ReadAllText(path);
-
+            var text = UtilityModule.GetJsonText("config");
             EmbedThumbnail = JsonSerializer.Deserialize<Config>(text).EmbedThumbnail;
         }
     }

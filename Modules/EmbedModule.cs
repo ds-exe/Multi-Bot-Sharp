@@ -2,7 +2,7 @@
 {
     public class EmbedModule
     {
-        public DiscordEmbed GetTimestampEmbed(string time)
+        public static DiscordEmbed GetTimestampEmbed(string time)
         {
             var embed = new DiscordEmbedBuilder();
             embed.Color = new DiscordColor("00FFFF");

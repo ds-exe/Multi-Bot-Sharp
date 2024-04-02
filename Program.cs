@@ -9,15 +9,7 @@
 
         static async Task MainAsync()
         {
-            string cwd = Directory.GetCurrentDirectory();
-            string path = cwd + @"/config.json";
-
-            #if DEBUG
-            path = cwd + @"/../../../config.json";
-            #endif
-
-            string text = File.ReadAllText(path);
-
+            var text = UtilityModule.GetJsonText("config");
             var config = JsonSerializer.Deserialize<Config>(text);
             if (config == null || config.Token == null || config.LavalinkPassword == null || config.Prefix == null)
             {
@@ -47,7 +39,8 @@
             var lavalink = discord.UseLavalink();
 
             var services = new ServiceCollection()
-                .AddSingleton<EmbedModule>()
+                //.AddSingleton<EmbedModule>()
+                //.AddSingleton<UtilityModule>()
                 .BuildServiceProvider();
 
             var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
