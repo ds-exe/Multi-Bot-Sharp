@@ -11,7 +11,7 @@
         [Command("resin")]
         public async Task Resin(CommandContext ctx, [Description("hsr or genshin")] string game, [Description("positive value to set, negative value to reduce")] int? resin = null)
         {
-            if (!IsValidGame(game))
+            if (!games.ContainsKey(game))
             {
                 await ctx.RespondAsync("Resin error message");
                 return;
@@ -24,11 +24,6 @@
             }
 
             await ctx.RespondAsync("TODO");
-        }
-
-        public bool IsValidGame(string game)
-        {
-            return games.ContainsKey(game);
         }
 
         [Command("hsr")]
