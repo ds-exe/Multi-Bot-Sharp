@@ -19,7 +19,7 @@ namespace Multi_Bot_Sharp.Modules
         {
             var embed = new DiscordEmbedBuilder();
             embed.Color = new DiscordColor("0099ff");
-            embed.Description = $"[{trackInfo.Title}]({trackInfo.Uri})";
+            embed.Description = $"Started playing [{trackInfo.Title}]({trackInfo.Uri})";
             return embed.Build();
         }
 
@@ -30,7 +30,7 @@ namespace Multi_Bot_Sharp.Modules
 
         public static DiscordEmbed GetNowPlayingEmbed(LavalinkTrackInfo trackInfo, DiscordUser user)
         {
-            return GetFormattedTrackEmbed(trackInfo, user, "Now Playing");
+            return GetFormattedTrackEmbed(trackInfo, user, "Currently Playing");
         }
 
         private static DiscordEmbed GetFormattedTrackEmbed(LavalinkTrackInfo trackInfo, DiscordUser user, string title)
@@ -44,7 +44,7 @@ namespace Multi_Bot_Sharp.Modules
             }
             embed.Description = $"[{trackInfo.Title}]({trackInfo.Uri})";
             var format = trackInfo.Length.TotalHours >= 1 ? @"hh\:mm\:ss" : @"mm\:ss";
-            embed.AddField(new DiscordEmbedField("Track Length", $"{trackInfo.Position.ToString(format)}/{trackInfo.Length.ToString(format)}", true));
+            embed.AddField(new DiscordEmbedField("Track Length", $"{trackInfo.Length.ToString(format)}", true));
             embed.AddField(new DiscordEmbedField("Added by", $"<@{user.Id}>", true));
             return embed.Build();
         }
