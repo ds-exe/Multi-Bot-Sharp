@@ -44,18 +44,17 @@
                 return;
             }
 
-            if (!JoinAsync(ctx).Result)
-            {
-                return;
-            }
-
             var lavalink = ctx.Client.GetLavalink();
             var guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
 
             if (guildPlayer == null)
             {
-                await ctx.RespondAsync("Music connection error.");
-                return;
+                if (!JoinAsync(ctx).Result)
+                {
+                    await ctx.RespondAsync("Music connection error.");
+                    return;
+                }
+                guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
             }
 
             var loadResult = await guildPlayer.LoadTracksAsync(LavalinkSearchType.Youtube, query);
@@ -182,6 +181,7 @@
                 {
                     await queue.PreviousQueueEntry.DiscordMessage.DeleteAsync();
                 }
+
                 var next = queue.GetNextQueueEntry();
                 if (next == null)
                 {

@@ -14,7 +14,7 @@
         public QueueEntry? GetNextQueueEntry()
         {
             PreviousQueueEntry = QueueEntries.FirstOrDefault();
-            QueueEntries.RemoveAt(0);
+            QueueEntries.Remove(PreviousQueueEntry);
             return PreviousQueueEntry;
         }
     }
