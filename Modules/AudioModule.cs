@@ -51,7 +51,6 @@
             {
                 if (!JoinAsync(ctx).Result)
                 {
-                    await ctx.RespondAsync("Music connection error.");
                     return;
                 }
                 guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
@@ -94,7 +93,7 @@
 
         private void QueueTrack(CommandContext ctx, Queue queue, LavalinkTrack track)
         {
-            ctx.RespondAsync($"Track {track.Info.Title} added");
+            ctx.Channel.SendMessageAsync(EmbedModule.GetTrackAddedEmbed(track.Info, ctx.User));
             queue.AddTrack(ctx.Channel, track);
         }
 
@@ -156,10 +155,23 @@
             await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
         }
 
+        [Command("nowplaying")]
+        [Description("Shows currently playing song")]
+        public async Task NowPlaying(CommandContext ctx)
+        {
+            var lavalink = ctx.Client.GetLavalink();
+            var guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
+            if (guildPlayer == null || guildPlayer.CurrentTrack == null)
+            {
+                await ctx.RespondAsync("Nothing is playing.");
+                return;
+            }
+
+            await ctx.Channel.SendMessageAsync(EmbedModule.GetNowPlayingEmbed(guildPlayer.CurrentTrack.Info, ctx.User));
+        }
+
         private async Task Player_TrackStarted(LavalinkGuildPlayer sender, DisCatSharp.Lavalink.EventArgs.LavalinkTrackStartedEventArgs e)
         {
-            var track = e.Track;
-            var info = e.Track.Info;
             return;
         }
 
@@ -188,7 +200,7 @@
                     return;
                 }
                 await player.PlayAsync(next.Track);
-                queue.PreviousQueueEntry.DiscordMessage = await next.Channel.SendMessageAsync($"Track is playing");
+                queue.PreviousQueueEntry.DiscordMessage = await next.Channel.SendMessageAsync(EmbedModule.GetTrackPlayingEmbed(next.Track.Info));
             }
         }
     }
