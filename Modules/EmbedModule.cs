@@ -1,7 +1,4 @@
-﻿using Octokit;
-using System;
-
-namespace Multi_Bot_Sharp.Modules
+﻿namespace Multi_Bot_Sharp.Modules
 {
     public class EmbedModule
     {
