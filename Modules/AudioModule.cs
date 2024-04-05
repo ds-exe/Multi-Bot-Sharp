@@ -2,12 +2,19 @@
 {
     public class AudioModule : BaseCommandModule
     {
+        private QueueModule _queueModule;
+
+        public AudioModule(QueueModule queueModule)
+        {
+            _queueModule = queueModule;
+        }
+
         private async Task<bool> JoinAsync(CommandContext ctx)
         {
             var lavalink = ctx.Client.GetLavalink();
             if (!lavalink.ConnectedSessions.Any())
             {
-                await ctx.RespondAsync("The Lavalink connection is not established");
+                await ctx.RespondAsync("Music connection error.");
                 return false;
             }
 
@@ -20,7 +27,10 @@
                 return false;
             }
 
-            await session.ConnectAsync(channel);
+            var player = await session.ConnectAsync(channel);
+
+            player.TrackStarted += Player_TrackStarted;
+            player.TrackEnded += Player_TrackEnded;
             return true;
         }
 
@@ -44,7 +54,7 @@
 
             if (guildPlayer == null)
             {
-                await ctx.RespondAsync("Lavalink is not connected.");
+                await ctx.RespondAsync("Music connection error.");
                 return;
             }
 
@@ -57,17 +67,129 @@
                 return;
             }
 
-            LavalinkTrack track = loadResult.LoadType switch
+            var queue = _queueModule.GetQueue(guildPlayer.ChannelId);
+            if (queue == null)
             {
-                LavalinkLoadResultType.Track => loadResult.GetResultAs<LavalinkTrack>(),
-                LavalinkLoadResultType.Playlist => loadResult.GetResultAs<LavalinkPlaylist>().Tracks.First(),
-                LavalinkLoadResultType.Search => loadResult.GetResultAs<List<LavalinkTrack>>().First(),
-                _ => throw new InvalidOperationException("Unexpected load result type.")
-            };
+                queue = _queueModule.AddQueue(guildPlayer.ChannelId);
+            }
 
-            await guildPlayer.PlayAsync(track);
+            if (loadResult.LoadType == LavalinkLoadResultType.Track)
+            {
+                QueueTrack(ctx, queue, loadResult.GetResultAs<LavalinkTrack>());
+            }
+            else if(loadResult.LoadType == LavalinkLoadResultType.Playlist)
+            {
+                QueuePlaylist(ctx, queue, loadResult.GetResultAs<LavalinkPlaylist>());
+            }
+            else if (loadResult.LoadType == LavalinkLoadResultType.Search)
+            {
+                QueueTrack(ctx, queue, loadResult.GetResultAs<List<LavalinkTrack>>().First());
+            }
+            else
+            {
+                throw new InvalidOperationException("Unexpected load result type.");
+            }
 
-            await ctx.RespondAsync($"Now playing {track.Info.Title}!");
+            PlayQueueAsync(guildPlayer, queue);
+        }
+
+        private void QueueTrack(CommandContext ctx, Queue queue, LavalinkTrack track)
+        {
+            ctx.RespondAsync($"Track {track.Info.Title} added");
+            queue.AddTrack(ctx.Channel, track);
+        }
+
+        private void QueuePlaylist(CommandContext ctx, Queue queue, LavalinkPlaylist playlist)
+        {
+            ctx.RespondAsync($"Playlist {playlist.Info.Name} added");
+            foreach (var track in playlist.Tracks)
+            {
+                queue.AddTrack(ctx.Channel, track);
+            }
+        }
+
+        [Command("skip")]
+        [Description("Skips track")]
+        public async Task Skip(CommandContext ctx)
+        {
+            var lavalink = ctx.Client.GetLavalink();
+            var guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
+            if (guildPlayer == null)
+            {
+                await ctx.RespondAsync("Nothing is playing.");
+                return;
+            }
+
+            await guildPlayer.StopAsync();
+            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
+        }
+
+        [Command("leave")]
+        [Description("Leaves channel")]
+        public async Task Leave(CommandContext ctx)
+        {
+            var lavalink = ctx.Client.GetLavalink();
+            var guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
+            if (guildPlayer == null)
+            {
+                await ctx.RespondAsync("Nothing is playing.");
+                return;
+            }
+
+            await guildPlayer.DisconnectAsync();
+            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
+        }
+
+        [Command("stop")]
+        [Description("Stops playback")]
+        public async Task Stop(CommandContext ctx)
+        {
+            var lavalink = ctx.Client.GetLavalink();
+            var guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
+            if (guildPlayer == null)
+            {
+                await ctx.RespondAsync("Nothing is playing.");
+                return;
+            }
+
+            _queueModule.RemoveQueue(guildPlayer.ChannelId);
+            await guildPlayer.StopAsync();
+            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
+        }
+
+        private async Task Player_TrackStarted(LavalinkGuildPlayer sender, DisCatSharp.Lavalink.EventArgs.LavalinkTrackStartedEventArgs e)
+        {
+            var track = e.Track;
+            var info = e.Track.Info;
+            return;
+        }
+
+        private async Task Player_TrackEnded(LavalinkGuildPlayer sender, DisCatSharp.Lavalink.EventArgs.LavalinkTrackEndedEventArgs e)
+        {
+            PlayQueueAsync(sender, _queueModule.GetQueue(sender.ChannelId));
+        }
+
+        public async void PlayQueueAsync(LavalinkGuildPlayer player, Queue queue)
+        {
+            if (queue == null)
+            {
+                return;
+            }
+
+            if (player.CurrentTrack == null)
+            {
+                if (queue.PreviousQueueEntry != null)
+                {
+                    await queue.PreviousQueueEntry.DiscordMessage.DeleteAsync();
+                }
+                var next = queue.GetNextQueueEntry();
+                if (next == null)
+                {
+                    return;
+                }
+                await player.PlayAsync(next.Track);
+                queue.PreviousQueueEntry.DiscordMessage = await next.Channel.SendMessageAsync($"Track is playing");
+            }
         }
     }
 }

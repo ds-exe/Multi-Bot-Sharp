@@ -39,8 +39,7 @@
             var lavalink = discord.UseLavalink();
 
             var services = new ServiceCollection()
-                //.AddSingleton<EmbedModule>()
-                //.AddSingleton<UtilityModule>()
+                .AddSingleton<QueueModule>()
                 .BuildServiceProvider();
 
             var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
