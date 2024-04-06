@@ -2,7 +2,7 @@
 {
     public class AudioModule : BaseCommandModule
     {
-        private const int timeoutMinutes = 1;
+        private const int timeoutMinutes = 15;
 
         private QueueModule _queueModule;
 
