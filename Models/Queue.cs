@@ -1,21 +1,20 @@
-﻿namespace Multi_Bot_Sharp.Models
+﻿namespace Multi_Bot_Sharp.Models;
+
+public class Queue
 {
-    public class Queue
+    public List<QueueEntry> QueueEntries = new List<QueueEntry>();
+
+    public  QueueEntry? PreviousQueueEntry { get; set; }
+
+    public void AddTrack(DiscordChannel channel, LavalinkTrack track)
     {
-        public List<QueueEntry> QueueEntries = new List<QueueEntry>();
+        QueueEntries.Add(new QueueEntry(channel, track));
+    }
 
-        public  QueueEntry? PreviousQueueEntry { get; set; }
-
-        public void AddTrack(DiscordChannel channel, LavalinkTrack track)
-        {
-            QueueEntries.Add(new QueueEntry(channel, track));
-        }
-
-        public QueueEntry? GetNextQueueEntry()
-        {
-            PreviousQueueEntry = QueueEntries.FirstOrDefault();
-            QueueEntries.Remove(PreviousQueueEntry);
-            return PreviousQueueEntry;
-        }
+    public QueueEntry? GetNextQueueEntry()
+    {
+        PreviousQueueEntry = QueueEntries.FirstOrDefault();
+        QueueEntries.Remove(PreviousQueueEntry);
+        return PreviousQueueEntry;
     }
 }

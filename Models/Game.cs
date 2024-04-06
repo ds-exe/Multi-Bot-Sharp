@@ -1,9 +1,8 @@
-﻿namespace Multi_Bot_Sharp.Models
-{
-    public class Game
-    {
-        public int MaxResin { get; set; }
+﻿namespace Multi_Bot_Sharp.Models;
 
-        public int ResinsMins { get; set;}
-    }
+public class Game
+{
+    public int MaxResin { get; set; }
+
+    public int ResinsMins { get; set;}
 }
