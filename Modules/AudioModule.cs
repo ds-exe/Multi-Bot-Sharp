@@ -1,5 +1,7 @@
 ﻿namespace Multi_Bot_Sharp.Modules;
 
+[Group("music")]
+[Description("Music commands")]
 public class AudioModule : BaseCommandModule
 {
     private const int timeoutMinutes = 15;
@@ -9,6 +11,13 @@ public class AudioModule : BaseCommandModule
     public AudioModule(QueueModule queueModule)
     {
         _queueModule = queueModule;
+    }
+
+    [GroupCommand, Command("help")]
+    [Description("Lists music commands")]
+    public async Task Help(CommandContext ctx)
+    {
+        await ctx.RespondAsync(UtilityModule.GetCustomHelpCommand(ctx));
     }
 
     private async Task<bool> JoinAsync(CommandContext ctx)
@@ -44,6 +53,13 @@ public class AudioModule : BaseCommandModule
             await ctx.RespondAsync("Cannot play in DM's.");
             return;
         }
+
+        if (string.IsNullOrEmpty(query))
+        {
+            await ctx.RespondAsync("No query given.");
+            return;
+        }
+
         await ctx.Message.ModifySuppressionAsync(true);
 
         if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
@@ -112,12 +128,34 @@ public class AudioModule : BaseCommandModule
         }
         var lavalink = ctx.Client.GetLavalink();
         var guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
-        if (guildPlayer == null)
+        if (guildPlayer == null || guildPlayer.CurrentTrack == null)
         {
             await ctx.RespondAsync("Nothing is playing.");
             return;
         }
 
+        await guildPlayer.StopAsync();
+        await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
+    }
+
+    [Command("stop")]
+    [Description("Stops playback")]
+    public async Task Stop(CommandContext ctx)
+    {
+        if (UtilityModule.IsDM(ctx))
+        {
+            await ctx.RespondAsync("Cannot play in DM's.");
+            return;
+        }
+        var lavalink = ctx.Client.GetLavalink();
+        var guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
+        if (guildPlayer == null || guildPlayer.CurrentTrack == null)
+        {
+            await ctx.RespondAsync("Nothing is playing.");
+            return;
+        }
+
+        _queueModule.RemoveQueue(guildPlayer.ChannelId);
         await guildPlayer.StopAsync();
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
     }
@@ -135,33 +173,11 @@ public class AudioModule : BaseCommandModule
         var guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
         if (guildPlayer == null)
         {
-            await ctx.RespondAsync("Nothing is playing.");
+            await ctx.RespondAsync("Not in voice.");
             return;
         }
 
         await guildPlayer.DisconnectAsync();
-        await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
-    }
-
-    [Command("stop")]
-    [Description("Stops playback")]
-    public async Task Stop(CommandContext ctx)
-    {
-        if (UtilityModule.IsDM(ctx))
-        {
-            await ctx.RespondAsync("Cannot play in DM's.");
-            return;
-        }
-        var lavalink = ctx.Client.GetLavalink();
-        var guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
-        if (guildPlayer == null)
-        {
-            await ctx.RespondAsync("Nothing is playing.");
-            return;
-        }
-
-        _queueModule.RemoveQueue(guildPlayer.ChannelId);
-        await guildPlayer.StopAsync();
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
     }
 
@@ -202,10 +218,10 @@ public class AudioModule : BaseCommandModule
 
     private async Task Player_TrackEnded(LavalinkGuildPlayer sender, DisCatSharp.Lavalink.EventArgs.LavalinkTrackEndedEventArgs e)
     {
-        PlayQueueAsync(sender, _queueModule.GetQueue(sender.ChannelId));
+        await PlayQueueAsync(sender, _queueModule.GetQueue(sender.ChannelId));
     }
 
-    public async void PlayQueueAsync(LavalinkGuildPlayer player, Queue queue)
+    public async Task PlayQueueAsync(LavalinkGuildPlayer player, Queue queue)
     {
         if (queue == null)
         {

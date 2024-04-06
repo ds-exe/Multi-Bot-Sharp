@@ -5,7 +5,7 @@
 public class PermissionsModule : BaseCommandModule
 {
     [GroupCommand, Command("help")]
-    [Description("Lists sub commands")]
+    [Description("Lists permission commands")]
     public async Task Help(CommandContext ctx)
     {
         await ctx.RespondAsync(UtilityModule.GetCustomHelpCommand(ctx));

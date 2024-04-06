@@ -26,12 +26,17 @@ public class UtilityModule
 
     public static DiscordEmbed GetCustomHelpCommand(CommandContext ctx)
     {
+        var command = ctx.Command;
+        if (command.Name.ToLower() == "help")
+        {
+            command = command.Parent;
+        }
         var helpCommand = ctx.CommandsNext.FindCommand("help", out var _);
         var commandContext = ctx.CommandsNext.CreateContext(ctx.Message, UtilityModule.GetPrefix(), helpCommand, "perms");
-        var customHelpMessage = new CustomHelpFormatter(commandContext).WithCommand(ctx.Command);
-        if (ctx.Command is CommandGroup)
+        var customHelpMessage = new CustomHelpFormatter(commandContext).WithCommand(command);
+        if (command is CommandGroup)
         {
-            customHelpMessage.WithSubcommands(((CommandGroup)ctx.Command).Children);
+            customHelpMessage.WithSubcommands(((CommandGroup)command).Children);
         }
         return customHelpMessage.Build().Embed;
     }
