@@ -2,7 +2,7 @@
 {
     public class AudioModule : BaseCommandModule
     {
-        private const int timeoutMinutes = 15;
+        private const int timeoutMinutes = 1;
 
         private QueueModule _queueModule;
 
@@ -243,9 +243,12 @@
             await Task.Delay(timeoutMinutes * 60 * 1000);
             if (_queueModule.GetLastPlayed(player.ChannelId) <= DateTime.UtcNow.AddMinutes(-timeoutMinutes))
             {
-                _queueModule.RemoveLastPlayed(player.ChannelId);
-                _queueModule.RemoveQueue(player.ChannelId);
-                await player.DisconnectAsync();
+                if (player.CurrentTrack == null)
+                {
+                    _queueModule.RemoveLastPlayed(player.ChannelId);
+                    _queueModule.RemoveQueue(player.ChannelId);
+                    await player.DisconnectAsync();
+                }
             }
         }
     }
