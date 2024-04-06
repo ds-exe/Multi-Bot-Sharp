@@ -8,7 +8,7 @@
         [Description("Lists sub commands")]
         public async Task Help(CommandContext ctx)
         {
-
+            await ctx.RespondAsync(UtilityModule.GetCustomHelpCommand(ctx));
         }
 
         [Command("listusers")]
