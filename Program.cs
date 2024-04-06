@@ -25,7 +25,7 @@
 
             var endpoint = new ConnectionEndpoint
             {
-                Hostname = "127.0.0.1", // From your server configuration.
+                Hostname = "lavalink", // From your server configuration.
                 Port = 2333 // From your server configuration
             };
 
@@ -52,6 +52,8 @@
 
             commands.SetHelpFormatter<CustomHelpFormatter>();
 
+            await Task.Delay(15 * 1000);
+
             await discord.ConnectAsync();
             try
             {
@@ -60,6 +62,7 @@
             catch
             {
                 Console.WriteLine("Lavalink connection error.");
+                Environment.Exit(1);
             }
 
             await Task.Delay(-1);
