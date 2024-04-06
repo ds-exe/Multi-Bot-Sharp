@@ -2,6 +2,8 @@
 {
     public class AudioModule : BaseCommandModule
     {
+        private const int timeoutMinutes = 15;
+
         private QueueModule _queueModule;
 
         public AudioModule(QueueModule queueModule)
@@ -78,10 +80,6 @@
             }
 
             var queue = _queueModule.GetQueue(guildPlayer.ChannelId);
-            if (queue == null)
-            {
-                queue = _queueModule.AddQueue(guildPlayer.ChannelId);
-            }
 
             if (loadResult.LoadType == LavalinkLoadResultType.Track)
             {
@@ -231,10 +229,23 @@
                 var next = queue.GetNextQueueEntry();
                 if (next == null)
                 {
+                    _queueModule.SetLastPlayed(player.ChannelId);
+                    Timeout(player);
                     return;
                 }
                 await player.PlayAsync(next.Track);
                 queue.PreviousQueueEntry.DiscordMessage = await next.Channel.SendMessageAsync(EmbedModule.GetTrackPlayingEmbed(next.Track.Info));
+            }
+        }
+
+        public async void Timeout(LavalinkGuildPlayer player)
+        {
+            await Task.Delay(timeoutMinutes * 60 * 1000);
+            if (_queueModule.GetLastPlayed(player.ChannelId) <= DateTime.UtcNow.AddMinutes(-timeoutMinutes))
+            {
+                _queueModule.RemoveLastPlayed(player.ChannelId);
+                _queueModule.RemoveQueue(player.ChannelId);
+                await player.DisconnectAsync();
             }
         }
     }
