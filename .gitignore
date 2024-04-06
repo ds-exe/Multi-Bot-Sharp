@@ -9,11 +9,13 @@
 
 # User-specific files
 config.json
+*.yml
 *.rsuser
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
+/plugins
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

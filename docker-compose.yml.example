@@ -1,0 +1,29 @@
+services:
+  lavalink:
+    # pin the image version to Lavalink v4
+    image: ghcr.io/lavalink-devs/lavalink:v4-update-lp
+    restart: unless-stopped
+    environment:
+      # set Java options here
+      - _JAVA_OPTIONS=-Xmx2G
+      # set lavalink server port
+      - SERVER_PORT=2333
+      # set password for lavalink
+      - LAVALINK_SERVER_PASSWORD=password
+    volumes:
+      # mount application.yml from the same directory or use environment variables
+      - ./application.yml:/opt/Lavalink/application.yml
+      # persist plugins between restarts, make sure to set the correct permissions (user: 322, group: 322)
+      - ./plugins/:/opt/Lavalink/plugins/
+    networks:
+      - lavalink
+  multibot:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - ./config.json:/App/config.json
+    networks:
+      - lavalink
+networks:
+  # create a lavalink network you can add other containers to, to give them access to Lavalink
+  lavalink: {}
