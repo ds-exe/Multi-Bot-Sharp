@@ -45,5 +45,16 @@
             embed.AddField(new DiscordEmbedField("Added by", $"<@{user.Id}>", true));
             return embed.Build();
         }
+
+        public static DiscordEmbed GetPlaylistAddedEmbed(LavalinkPlaylist playlist, DiscordUser user, string url)
+        {
+            var embed = new DiscordEmbedBuilder();
+            embed.Color = new DiscordColor("0099ff");
+            embed.Title = "Added Playlist";
+            embed.Description = $"[{playlist.Info.Name}]({url})";
+            embed.AddField(new DiscordEmbedField("Playlist Length", $"{playlist.Tracks.Count}", true));
+            embed.AddField(new DiscordEmbedField("Added by", $"<@{user.Id}>", true));
+            return embed.Build();
+        }
     }
 }

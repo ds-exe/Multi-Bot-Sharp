@@ -29,7 +29,6 @@
 
             var player = await session.ConnectAsync(channel);
 
-            player.TrackStarted += Player_TrackStarted;
             player.TrackEnded += Player_TrackEnded;
             return true;
         }
@@ -38,6 +37,13 @@
         [Description("Plays music")]
         public async Task Play(CommandContext ctx, [RemainingText] string query)
         {
+            if (UtilityModule.IsDM(ctx))
+            {
+                await ctx.RespondAsync("Cannot play in DM's.");
+                return;
+            }
+            await ctx.Message.ModifySuppressionAsync(true);
+
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
                 await ctx.RespondAsync("You are not in a voice channel.");
@@ -56,7 +62,13 @@
                 guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
             }
 
-            var loadResult = await guildPlayer.LoadTracksAsync(LavalinkSearchType.Youtube, query);
+            var type = LavalinkSearchType.Youtube;
+            if (query.ToLower().Contains("http"))
+            {
+                type = LavalinkSearchType.Plain;
+            }
+
+            var loadResult = await guildPlayer.LoadTracksAsync(type, query);
 
             // If something went wrong on Lavalink's end or it just couldn't find anything.
             if (loadResult.LoadType == LavalinkLoadResultType.Empty || loadResult.LoadType == LavalinkLoadResultType.Error)
@@ -77,7 +89,7 @@
             }
             else if(loadResult.LoadType == LavalinkLoadResultType.Playlist)
             {
-                QueuePlaylist(ctx, queue, loadResult.GetResultAs<LavalinkPlaylist>());
+                QueuePlaylist(ctx, queue, loadResult.GetResultAs<LavalinkPlaylist>(), query);
             }
             else if (loadResult.LoadType == LavalinkLoadResultType.Search)
             {
@@ -91,25 +103,15 @@
             PlayQueueAsync(guildPlayer, queue);
         }
 
-        private void QueueTrack(CommandContext ctx, Queue queue, LavalinkTrack track)
-        {
-            ctx.Channel.SendMessageAsync(EmbedModule.GetTrackAddedEmbed(track.Info, ctx.User));
-            queue.AddTrack(ctx.Channel, track);
-        }
-
-        private void QueuePlaylist(CommandContext ctx, Queue queue, LavalinkPlaylist playlist)
-        {
-            ctx.RespondAsync($"Playlist {playlist.Info.Name} added");
-            foreach (var track in playlist.Tracks)
-            {
-                queue.AddTrack(ctx.Channel, track);
-            }
-        }
-
         [Command("skip")]
         [Description("Skips track")]
         public async Task Skip(CommandContext ctx)
         {
+            if (UtilityModule.IsDM(ctx))
+            {
+                await ctx.RespondAsync("Cannot play in DM's.");
+                return;
+            }
             var lavalink = ctx.Client.GetLavalink();
             var guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
             if (guildPlayer == null)
@@ -126,6 +128,11 @@
         [Description("Leaves channel")]
         public async Task Leave(CommandContext ctx)
         {
+            if (UtilityModule.IsDM(ctx))
+            {
+                await ctx.RespondAsync("Cannot play in DM's.");
+                return;
+            }
             var lavalink = ctx.Client.GetLavalink();
             var guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
             if (guildPlayer == null)
@@ -142,6 +149,11 @@
         [Description("Stops playback")]
         public async Task Stop(CommandContext ctx)
         {
+            if (UtilityModule.IsDM(ctx))
+            {
+                await ctx.RespondAsync("Cannot play in DM's.");
+                return;
+            }
             var lavalink = ctx.Client.GetLavalink();
             var guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
             if (guildPlayer == null)
@@ -159,6 +171,11 @@
         [Description("Shows currently playing song")]
         public async Task NowPlaying(CommandContext ctx)
         {
+            if (UtilityModule.IsDM(ctx))
+            {
+                await ctx.RespondAsync("Cannot play in DM's.");
+                return;
+            }
             var lavalink = ctx.Client.GetLavalink();
             var guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
             if (guildPlayer == null || guildPlayer.CurrentTrack == null)
@@ -170,9 +187,19 @@
             await ctx.Channel.SendMessageAsync(EmbedModule.GetNowPlayingEmbed(guildPlayer.CurrentTrack.Info, ctx.User));
         }
 
-        private async Task Player_TrackStarted(LavalinkGuildPlayer sender, DisCatSharp.Lavalink.EventArgs.LavalinkTrackStartedEventArgs e)
+        private void QueueTrack(CommandContext ctx, Queue queue, LavalinkTrack track)
         {
-            return;
+            ctx.Channel.SendMessageAsync(EmbedModule.GetTrackAddedEmbed(track.Info, ctx.User));
+            queue.AddTrack(ctx.Channel, track);
+        }
+
+        private void QueuePlaylist(CommandContext ctx, Queue queue, LavalinkPlaylist playlist, string url)
+        {
+            ctx.Channel.SendMessageAsync(EmbedModule.GetPlaylistAddedEmbed(playlist, ctx.User, url));
+            foreach (var track in playlist.Tracks)
+            {
+                queue.AddTrack(ctx.Channel, track);
+            }
         }
 
         private async Task Player_TrackEnded(LavalinkGuildPlayer sender, DisCatSharp.Lavalink.EventArgs.LavalinkTrackEndedEventArgs e)
@@ -191,7 +218,14 @@
             {
                 if (queue.PreviousQueueEntry != null)
                 {
-                    await queue.PreviousQueueEntry.DiscordMessage.DeleteAsync();
+                    try
+                    {
+                        await queue.PreviousQueueEntry.DiscordMessage.DeleteAsync();
+                    }
+                    catch
+                    {
+                        return;
+                    }
                 }
 
                 var next = queue.GetNextQueueEntry();

@@ -13,5 +13,10 @@
 
             return File.ReadAllText(path);
         }
+
+        public static bool IsDM(CommandContext ctx)
+        {
+            return ctx.Channel.IsPrivate;
+        }
     }
 }
