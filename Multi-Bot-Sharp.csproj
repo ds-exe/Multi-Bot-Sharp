@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include=".github\workflows\deploy.yml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="DisCatSharp" Version="10.6.2-nightly-014" />
     <PackageReference Include="DisCatSharp.CommandsNext" Version="10.6.2-nightly-014" />
     <PackageReference Include="DisCatSharp.Lavalink" Version="10.6.2-nightly-014" />

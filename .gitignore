@@ -9,7 +9,8 @@
 
 # User-specific files
 config.json
-*.yml
+application.yml
+docker-compose.yml
 *.rsuser
 *.suo
 *.user
