@@ -1,6 +1,6 @@
 server: # REST and WS server
   port: 2333
-  address: 0.0.0.0
+  address: lavalink
 plugins:
   lavasrc:
     providers: # Custom providers for track loading. This is the default

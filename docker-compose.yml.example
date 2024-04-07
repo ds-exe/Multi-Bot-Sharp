@@ -18,7 +18,7 @@ services:
     networks:
       - lavalink
   multibot:
-    build: .
+    image: ghcr.io/ds-exe/multi-bot-sharp:latest
     restart: unless-stopped
     volumes:
       - ./config.json:/App/config.json
