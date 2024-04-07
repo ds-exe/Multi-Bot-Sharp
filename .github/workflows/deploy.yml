@@ -14,7 +14,7 @@ jobs:
           fetch-depth: 0
       - uses: docker/metadata-action@v4
         with:
-          images: ghcr.io/ds-exe/Multi-Bot-Sharp
+          images: ghcr.io/ds-exe/multi-bot-sharp
           tags: |
             type=semver,pattern={{major}}
             type=semver,pattern={{major}}.{{minor}}
