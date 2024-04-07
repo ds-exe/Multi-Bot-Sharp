@@ -29,6 +29,14 @@
                 Port = 2333 // From your server configuration
             };
 
+            #if DEBUG
+            endpoint = new ConnectionEndpoint
+            {
+                Hostname = "127.0.0.1", // From your server configuration.
+                Port = 2333 // From your server configuration
+            };
+            #endif
+
             var lavalinkConfig = new LavalinkConfiguration
             {
                 Password = config.LavalinkPassword, // From your server configuration.
