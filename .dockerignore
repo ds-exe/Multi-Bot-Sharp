@@ -5,4 +5,7 @@
 /obj
 /Properties
 config.json
+application.yml
 .user
+.example
+/plugins
