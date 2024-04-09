@@ -23,10 +23,16 @@ public class AudioModule : BaseCommandModule
     private async Task<bool> JoinAsync(CommandContext ctx)
     {
         var lavalink = ctx.Client.GetLavalink();
-        if (!lavalink.ConnectedSessions.Any())
+        while(!lavalink.ConnectedSessions.Any())
         {
-            await ctx.RespondAsync("Music connection error.");
-            return false;
+            await ctx.RespondAsync("Music connection error, attempting to reconnect player.");
+            lavalink = ctx.Client.GetLavalink();
+            await UtilityModule.ConnectLavalink(lavalink);
+
+            if (!lavalink.ConnectedSessions.Any()) {
+                await ctx.RespondAsync("Music connection failed to restart.");
+                return false;
+            }
         }
 
         var session = lavalink.ConnectedSessions.Values.First();
@@ -270,4 +276,3 @@ public class AudioModule : BaseCommandModule
         }
     }
 }
-

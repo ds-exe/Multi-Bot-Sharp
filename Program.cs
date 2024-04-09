@@ -23,27 +23,6 @@
                 Intents = DiscordIntents.AllUnprivileged | DiscordIntents.MessageContent
             });
 
-            var endpoint = new ConnectionEndpoint
-            {
-                Hostname = "lavalink", // From your server configuration.
-                Port = 2333 // From your server configuration
-            };
-
-            #if DEBUG
-            endpoint = new ConnectionEndpoint
-            {
-                Hostname = "127.0.0.1", // From your server configuration.
-                Port = 2333 // From your server configuration
-            };
-            #endif
-
-            var lavalinkConfig = new LavalinkConfiguration
-            {
-                Password = config.LavalinkPassword, // From your server configuration.
-                RestEndpoint = endpoint,
-                SocketEndpoint = endpoint
-            };
-
             var lavalink = discord.UseLavalink();
 
             var services = new ServiceCollection()
@@ -63,15 +42,7 @@
             await Task.Delay(15 * 1000);
 
             await discord.ConnectAsync();
-            try
-            {
-                await lavalink.ConnectAsync(lavalinkConfig);
-            }
-            catch
-            {
-                Console.WriteLine("Lavalink connection error.");
-                Environment.Exit(1);
-            }
+            await UtilityModule.ConnectLavalink(lavalink);
 
             await Task.Delay(-1);
         }
