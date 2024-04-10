@@ -23,10 +23,9 @@ public class AudioModule : BaseCommandModule
     private async Task<bool> JoinAsync(CommandContext ctx)
     {
         var lavalink = ctx.Client.GetLavalink();
-        while(!lavalink.ConnectedSessions.Any())
+        if(!lavalink.ConnectedSessions.Any())
         {
             await ctx.RespondAsync("Music connection error, attempting to reconnect player.");
-            lavalink = ctx.Client.GetLavalink();
             await UtilityModule.ConnectLavalink(lavalink);
 
             if (!lavalink.ConnectedSessions.Any()) {
