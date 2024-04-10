@@ -14,11 +14,6 @@ public class UtilityModule
         return File.ReadAllText(path);
     }
 
-    public static string GetPrefix()
-    {
-        return JsonSerializer.Deserialize<Config>(GetJsonText("config")).Prefix;
-    }
-
     public static bool IsDM(CommandContext ctx)
     {
         return ctx.Channel.IsPrivate;
@@ -32,7 +27,7 @@ public class UtilityModule
             command = command.Parent;
         }
         var helpCommand = ctx.CommandsNext.FindCommand("help", out var _);
-        var commandContext = ctx.CommandsNext.CreateContext(ctx.Message, UtilityModule.GetPrefix(), helpCommand, "perms");
+        var commandContext = ctx.CommandsNext.CreateContext(ctx.Message, ctx.Prefix, helpCommand, "perms");
         var customHelpMessage = new CustomHelpFormatter(commandContext).WithCommand(command);
         if (command is CommandGroup)
         {

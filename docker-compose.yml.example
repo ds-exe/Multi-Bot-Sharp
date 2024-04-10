@@ -20,8 +20,11 @@ services:
   multibot:
     image: ghcr.io/ds-exe/multi-bot-sharp:latest
     restart: unless-stopped
+    environment:
+      - DATABASE_NAME=database_name.db
     volumes:
       - ./config.json:/App/config.json
+      - ./Database:/App/Database
     networks:
       - lavalink
 networks:
