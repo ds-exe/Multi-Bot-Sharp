@@ -13,9 +13,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.35" />
     <PackageReference Include="DisCatSharp" Version="10.6.2-nightly-014" />
     <PackageReference Include="DisCatSharp.CommandsNext" Version="10.6.2-nightly-014" />
     <PackageReference Include="DisCatSharp.Lavalink" Version="10.6.2-nightly-014" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.4" />
     <PackageReference Include="TimeZoneConverter" Version="6.1.0" />
   </ItemGroup>
 

@@ -17,6 +17,7 @@ docker-compose.yml
 *.userosscache
 *.sln.docstates
 /plugins
+*.db
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

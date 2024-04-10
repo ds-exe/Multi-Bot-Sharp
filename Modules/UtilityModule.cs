@@ -1,7 +1,4 @@
-﻿using Multi_Bot_Sharp.Models;
-using System.Net;
-
-namespace Multi_Bot_Sharp.Modules;
+﻿namespace Multi_Bot_Sharp.Modules;
 
 public class UtilityModule
 {

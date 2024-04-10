@@ -12,6 +12,7 @@ global using DisCatSharp.Net;
 global using Microsoft.Extensions.DependencyInjection;
 global using Multi_Bot_Sharp.Models;
 global using Multi_Bot_Sharp.Modules;
+global using Multi_Bot_Sharp.Services;
 global using System.Reflection;
 global using System.Text.Json;
 global using System.Text.RegularExpressions;

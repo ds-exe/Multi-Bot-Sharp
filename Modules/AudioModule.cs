@@ -6,11 +6,11 @@ public class AudioModule : BaseCommandModule
 {
     private const int timeoutMinutes = 15;
 
-    private QueueModule _queueModule;
+    private QueueService _queueService;
 
-    public AudioModule(QueueModule queueModule)
+    public AudioModule(QueueService queueService)
     {
-        _queueModule = queueModule;
+        _queueService = queueService;
     }
 
     [GroupCommand, Command("help")]
@@ -101,7 +101,7 @@ public class AudioModule : BaseCommandModule
             return;
         }
 
-        var queue = _queueModule.GetQueue(guildPlayer.ChannelId);
+        var queue = _queueService.GetQueue(guildPlayer.ChannelId);
 
         if (loadResult.LoadType == LavalinkLoadResultType.Track)
         {
@@ -161,7 +161,7 @@ public class AudioModule : BaseCommandModule
             return;
         }
 
-        _queueModule.RemoveQueue(guildPlayer.ChannelId);
+        _queueService.RemoveQueue(guildPlayer.ChannelId);
         await guildPlayer.StopAsync();
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
     }
@@ -224,7 +224,7 @@ public class AudioModule : BaseCommandModule
 
     private async Task Player_TrackEnded(LavalinkGuildPlayer sender, DisCatSharp.Lavalink.EventArgs.LavalinkTrackEndedEventArgs e)
     {
-        await PlayQueueAsync(sender, _queueModule.GetQueue(sender.ChannelId));
+        await PlayQueueAsync(sender, _queueService.GetQueue(sender.ChannelId));
     }
 
     public async Task PlayQueueAsync(LavalinkGuildPlayer player, Queue queue)
@@ -254,7 +254,7 @@ public class AudioModule : BaseCommandModule
         var next = queue.GetNextQueueEntry();
         if (next == null)
         {
-            _queueModule.SetLastPlayed(player.ChannelId);
+            _queueService.SetLastPlayed(player.ChannelId);
             Timeout(player);
             return;
         }
@@ -265,12 +265,12 @@ public class AudioModule : BaseCommandModule
     public async void Timeout(LavalinkGuildPlayer player)
     {
         await Task.Delay(timeoutMinutes * 60 * 1000);
-        if (_queueModule.GetLastPlayed(player.ChannelId) <= DateTime.UtcNow.AddMinutes(-timeoutMinutes))
+        if (_queueService.GetLastPlayed(player.ChannelId) <= DateTime.UtcNow.AddMinutes(-timeoutMinutes))
         {
             if (player.CurrentTrack == null)
             {
-                _queueModule.RemoveLastPlayed(player.ChannelId);
-                _queueModule.RemoveQueue(player.ChannelId);
+                _queueService.RemoveLastPlayed(player.ChannelId);
+                _queueService.RemoveQueue(player.ChannelId);
                 await player.DisconnectAsync();
             }
         }

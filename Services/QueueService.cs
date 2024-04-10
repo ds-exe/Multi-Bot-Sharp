@@ -1,6 +1,6 @@
-﻿namespace Multi_Bot_Sharp.Modules;
+﻿namespace Multi_Bot_Sharp.Services;
 
-public class QueueModule
+public class QueueService
 {
     private static Dictionary<ulong, Queue> players = new Dictionary<ulong, Queue>();
 

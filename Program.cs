@@ -26,7 +26,8 @@
             var lavalink = discord.UseLavalink();
 
             var services = new ServiceCollection()
-                .AddSingleton<QueueModule>()
+                .AddSingleton<QueueService>()
+                .AddSingleton<DatabaseService>()
                 .BuildServiceProvider();
 
             var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
@@ -36,14 +37,12 @@
             });
 
             commands.RegisterCommands(Assembly.GetExecutingAssembly());
-
             commands.SetHelpFormatter<CustomHelpFormatter>();
 
+            await discord.ConnectAsync();
             await Task.Delay(15 * 1000);
 
-            await discord.ConnectAsync();
             await UtilityModule.ConnectLavalink(lavalink);
-
             await Task.Delay(-1);
         }
     }
