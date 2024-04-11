@@ -60,22 +60,39 @@ public class TimeModule : BaseCommandModule
             await ctx.RespondAsync("Invalid timezone");
             return;
         }
+
+        date = ParseDate(date, zone);
         if (date == null)
         {
-            date = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zone).ToString("dd/MM/yyyy");
+            await ctx.RespondAsync("Invalid date");
+            return;
         }
-        if (date.Count(c => c == '/') == 1)
-        {
-            date += "/" + TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zone).Year;
-        }
-        var success = DateTime.TryParseExact(time + " " + date, "HH:mm dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var datetime);
+
+        var success = DateTime.TryParseExact($"{time} {date}", "HH:mm dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var datetime);
         if (!success)
         {
+            await ctx.RespondAsync("Invalid time");
             return;
         }
 
         var timestamp = TimeZoneInfo.ConvertTimeToUtc(datetime, zone).Timestamp(format);
         await ctx.RespondAsync(EmbedHelper.GetTimestampEmbed(timestamp));
+    }
+
+    private string? ParseDate(string? date, TimeZoneInfo zone)
+    {
+        var baseDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zone);
+        if (date == null)
+        {
+            return baseDate.ToString("dd/MM/yyyy");
+        }
+        var matches = Regex.Match(date, @"^(\d{2})/(\d{2})/?(\d{4})?$");
+        if (!matches.Success)
+        {
+            return null;
+        }
+        var year = matches.Groups[3].Value;
+        return $"{matches.Groups[1].Value}/{matches.Groups[2].Value}/{(year != string.Empty ? year : baseDate.Year)}"; ;
     }
 
     private TimeZoneInfo? GetTimeZone(string timezone)
