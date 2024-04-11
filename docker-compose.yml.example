@@ -19,6 +19,7 @@ services:
       - lavalink
   multibot:
     image: ghcr.io/ds-exe/multi-bot-sharp:latest
+    pull_policy: always
     restart: unless-stopped
     environment:
       - DATABASE_NAME=database_name.db
