@@ -18,6 +18,8 @@ docker-compose.yml
 *.sln.docstates
 /plugins
 *.db
+*.txt
+*.bat
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
