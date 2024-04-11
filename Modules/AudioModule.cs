@@ -17,7 +17,7 @@ public class AudioModule : BaseCommandModule
     [Description("Lists music commands")]
     public async Task Help(CommandContext ctx)
     {
-        await ctx.RespondAsync(UtilityModule.GetCustomHelpCommand(ctx));
+        await ctx.RespondAsync(EmbedHelper.GetCustomHelpCommandEmbed(ctx));
     }
 
     private async Task<bool> JoinAsync(CommandContext ctx)
@@ -26,7 +26,7 @@ public class AudioModule : BaseCommandModule
         if(!lavalink.ConnectedSessions.Any())
         {
             await ctx.RespondAsync("Music connection error, attempting to reconnect player.");
-            await UtilityModule.ConnectLavalink(lavalink);
+            await ConfigHelper.ConnectLavalink(lavalink);
 
             if (!lavalink.ConnectedSessions.Any()) {
                 await ctx.RespondAsync("Music connection failed to restart.");
@@ -53,7 +53,7 @@ public class AudioModule : BaseCommandModule
     [Description("Plays music")]
     public async Task Play(CommandContext ctx, [RemainingText] string query)
     {
-        if (UtilityModule.IsDM(ctx))
+        if (ctx.Channel.IsPrivate)
         {
             await ctx.RespondAsync("Cannot play in DM's.");
             return;
@@ -126,7 +126,7 @@ public class AudioModule : BaseCommandModule
     [Description("Skips track")]
     public async Task Skip(CommandContext ctx)
     {
-        if (UtilityModule.IsDM(ctx))
+        if (ctx.Channel.IsPrivate)
         {
             await ctx.RespondAsync("Cannot play in DM's.");
             return;
@@ -147,7 +147,7 @@ public class AudioModule : BaseCommandModule
     [Description("Stops playback")]
     public async Task Stop(CommandContext ctx)
     {
-        if (UtilityModule.IsDM(ctx))
+        if (ctx.Channel.IsPrivate)
         {
             await ctx.RespondAsync("Cannot play in DM's.");
             return;
@@ -169,7 +169,7 @@ public class AudioModule : BaseCommandModule
     [Description("Leaves channel")]
     public async Task Leave(CommandContext ctx)
     {
-        if (UtilityModule.IsDM(ctx))
+        if (ctx.Channel.IsPrivate)
         {
             await ctx.RespondAsync("Cannot play in DM's.");
             return;
@@ -190,7 +190,7 @@ public class AudioModule : BaseCommandModule
     [Description("Shows currently playing song")]
     public async Task NowPlaying(CommandContext ctx)
     {
-        if (UtilityModule.IsDM(ctx))
+        if (ctx.Channel.IsPrivate)
         {
             await ctx.RespondAsync("Cannot play in DM's.");
             return;
@@ -203,18 +203,18 @@ public class AudioModule : BaseCommandModule
             return;
         }
 
-        await ctx.Channel.SendMessageAsync(EmbedModule.GetNowPlayingEmbed(guildPlayer.CurrentTrack.Info, ctx.User));
+        await ctx.Channel.SendMessageAsync(EmbedHelper.GetNowPlayingEmbed(guildPlayer.CurrentTrack.Info, ctx.User));
     }
 
     private void QueueTrack(CommandContext ctx, Queue queue, LavalinkTrack track)
     {
-        ctx.Channel.SendMessageAsync(EmbedModule.GetTrackAddedEmbed(track.Info, ctx.User));
+        ctx.Channel.SendMessageAsync(EmbedHelper.GetTrackAddedEmbed(track.Info, ctx.User));
         queue.AddTrack(ctx.Channel, track);
     }
 
     private void QueuePlaylist(CommandContext ctx, Queue queue, LavalinkPlaylist playlist, string url)
     {
-        ctx.Channel.SendMessageAsync(EmbedModule.GetPlaylistAddedEmbed(playlist, ctx.User, url));
+        ctx.Channel.SendMessageAsync(EmbedHelper.GetPlaylistAddedEmbed(playlist, ctx.User, url));
         foreach (var track in playlist.Tracks)
         {
             queue.AddTrack(ctx.Channel, track);
@@ -258,7 +258,7 @@ public class AudioModule : BaseCommandModule
             return;
         }
         await player.PlayAsync(next.Track);
-        queue.PreviousQueueEntry.DiscordMessage = await next.Channel.SendMessageAsync(EmbedModule.GetTrackPlayingEmbed(next.Track.Info));
+        queue.PreviousQueueEntry.DiscordMessage = await next.Channel.SendMessageAsync(EmbedHelper.GetTrackPlayingEmbed(next.Track.Info));
     }
 
     public async void Timeout(LavalinkGuildPlayer player)

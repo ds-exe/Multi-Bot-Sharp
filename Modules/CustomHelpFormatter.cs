@@ -22,7 +22,7 @@ public class CustomHelpFormatter : DefaultHelpFormatter
     private async Task InitialiseEmbeds(DiscordClient client)
     {
         User = await client.GetUserAsync(creatorID);
-        var text = UtilityModule.GetJsonText("config");
+        var text = ConfigHelper.GetJsonText("config");
         EmbedThumbnail = JsonSerializer.Deserialize<Config>(text).EmbedThumbnail;
     }
 }

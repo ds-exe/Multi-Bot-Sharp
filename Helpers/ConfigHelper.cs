@@ -1,6 +1,6 @@
-﻿namespace Multi_Bot_Sharp.Modules;
+﻿namespace Multi_Bot_Sharp.Helpers;
 
-public class UtilityModule
+public class ConfigHelper
 {
     public static string GetJsonText(string file)
     {
@@ -12,28 +12,6 @@ public class UtilityModule
         #endif
 
         return File.ReadAllText(path);
-    }
-
-    public static bool IsDM(CommandContext ctx)
-    {
-        return ctx.Channel.IsPrivate;
-    }
-
-    public static DiscordEmbed GetCustomHelpCommand(CommandContext ctx)
-    {
-        var command = ctx.Command;
-        if (command.Name.ToLower() == "help")
-        {
-            command = command.Parent;
-        }
-        var helpCommand = ctx.CommandsNext.FindCommand("help", out var _);
-        var commandContext = ctx.CommandsNext.CreateContext(ctx.Message, ctx.Prefix, helpCommand, "perms");
-        var customHelpMessage = new CustomHelpFormatter(commandContext).WithCommand(command);
-        if (command is CommandGroup)
-        {
-            customHelpMessage.WithSubcommands(((CommandGroup)command).Children);
-        }
-        return customHelpMessage.Build().Embed;
     }
 
     public async static Task ConnectLavalink(LavalinkExtension lavalink)

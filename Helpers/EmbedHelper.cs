@@ -1,6 +1,6 @@
-﻿namespace Multi_Bot_Sharp.Modules;
+﻿namespace Multi_Bot_Sharp.Helpers;
 
-public class EmbedModule
+public class EmbedHelper
 {
     public static DiscordEmbed GetTimestampEmbed(string time)
     {
@@ -55,5 +55,22 @@ public class EmbedModule
         embed.AddField(new DiscordEmbedField("Playlist Length", $"{playlist.Tracks.Count}", true));
         embed.AddField(new DiscordEmbedField("Added by", $"<@{user.Id}>", true));
         return embed.Build();
+    }
+
+    public static DiscordEmbed GetCustomHelpCommandEmbed(CommandContext ctx)
+    {
+        var command = ctx.Command;
+        if (command.Name.ToLower() == "help")
+        {
+            command = command.Parent;
+        }
+        var helpCommand = ctx.CommandsNext.FindCommand("help", out var _);
+        var commandContext = ctx.CommandsNext.CreateContext(ctx.Message, ctx.Prefix, helpCommand, "perms");
+        var customHelpMessage = new CustomHelpFormatter(commandContext).WithCommand(command);
+        if (command is CommandGroup)
+        {
+            customHelpMessage.WithSubcommands(((CommandGroup)command).Children);
+        }
+        return customHelpMessage.Build().Embed;
     }
 }

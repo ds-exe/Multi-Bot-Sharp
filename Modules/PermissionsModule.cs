@@ -8,7 +8,7 @@ public class PermissionsModule : BaseCommandModule
     [Description("Lists permission commands")]
     public async Task Help(CommandContext ctx)
     {
-        await ctx.RespondAsync(UtilityModule.GetCustomHelpCommand(ctx));
+        await ctx.RespondAsync(EmbedHelper.GetCustomHelpCommandEmbed(ctx));
     }
 
     [Command("listusers")]

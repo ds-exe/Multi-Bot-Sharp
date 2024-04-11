@@ -9,7 +9,7 @@
 
         static async Task MainAsync()
         {
-            var text = UtilityModule.GetJsonText("config");
+            var text = ConfigHelper.GetJsonText("config");
             var config = JsonSerializer.Deserialize<Config>(text);
             if (config == null || config.Token == null || config.LavalinkPassword == null || config.Prefix == null)
             {
@@ -42,7 +42,7 @@
             await discord.ConnectAsync();
             await Task.Delay(15 * 1000);
 
-            await UtilityModule.ConnectLavalink(lavalink);
+            await ConfigHelper.ConnectLavalink(lavalink);
             await Task.Delay(-1);
         }
     }
