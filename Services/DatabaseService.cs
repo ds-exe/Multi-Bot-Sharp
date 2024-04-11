@@ -19,7 +19,19 @@ public class DatabaseService
             dbName += ".db";
         }
         _connection = new SqliteConnection($"Data Source=Database/{dbName}");
-        _connection.Open();
+        try
+        {
+            _connection.Open();
+            InitialiseTables();
+        }
+        catch
+        {
+            Console.WriteLine("DB connection error, folder or name error");
+        }
+    }
+
+    public void InitialiseTables()
+    {
         InitialiseTable("ResinData(userID, game, startResin int, startTimestamp int, resinCapTimestamp int, PRIMARY KEY(userID, game))");
     }
 
@@ -32,10 +44,17 @@ public class DatabaseService
 
     private void InsertTest(string table)
     {
-        string query = $"INSERT INTO {table} (columns) VALUES (@value)";
-        var command = new SqliteCommand(query , _connection);
-        command.Parameters.AddWithValue("@value", "value");
-        command.ExecuteNonQueryAsync();
+        try
+        {
+            string query = $"INSERT INTO {table} (columns) VALUES (@value)";
+            var command = new SqliteCommand(query, _connection);
+            command.Parameters.AddWithValue("@value", "value");
+            command.ExecuteNonQueryAsync();
+        }
+        catch
+        {
+
+        }
     }
 
     public async Task<Resin?> GetResinData()
