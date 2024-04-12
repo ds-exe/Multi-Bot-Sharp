@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using DisCatSharp.Entities;
+using System.Globalization;
 
 namespace Multi_Bot_Sharp.Modules;
 
@@ -10,13 +11,13 @@ public class TimeModule : BaseCommandModule
     public TimeModule(DatabaseService databaseService)
     {
         _databaseService = databaseService;
-        var text = ConfigHelper.GetJsonText("TimeZones");
+        var text = ConfigHelper.GetJsonText("timezones");
         _timeZones = JsonSerializer.Deserialize<Dictionary<string, string>>(text) ?? new();
     }
 
     [Command("time")]
     [Description("Get an embed for a given time/date, optional timezone")]
-    public async Task Time(CommandContext ctx, [Description("time - hh:mm")] string time, [Description("optional - region/city or abbreviation")] string timezone = "utc")
+    public async Task Time(CommandContext ctx, [Description("time - hh:mm")] string time, [Description("optional - region/city or abbreviation")] string? timezone = null)
     {
         await SendTimeEmbed(ctx, time, null, timezone, TimestampFormat.LongDateTime);
     }
@@ -29,7 +30,7 @@ public class TimeModule : BaseCommandModule
 
     [Command("until")]
     [Description("Get an embed for a given time/date, optional timezone")]
-    public async Task Until(CommandContext ctx, [Description("time - hh:mm")] string time, [Description("optional - region/city or abbreviation")] string timezone = "utc")
+    public async Task Until(CommandContext ctx, [Description("time - hh:mm")] string time, [Description("optional - region/city or abbreviation")] string? timezone = null)
     {
         await SendTimeEmbed(ctx, time, null, timezone, TimestampFormat.RelativeTime);
     }
@@ -42,9 +43,9 @@ public class TimeModule : BaseCommandModule
 
     [Command("now")]
     [Description("Gets the time for a given timezone")]
-    public async Task Now(CommandContext ctx, [Description("Optional timezone, default UTC")] string timezone = "utc")
+    public async Task Now(CommandContext ctx, [Description("Optional timezone, default UTC")] string? timezone = null)
     {
-        var zone = GetTimeZone(timezone);
+        var zone = GetTimeZone(timezone, ctx.Member.Id);
         if (zone == null)
         {
             await ctx.RespondAsync("Invalid timezone");
@@ -59,10 +60,10 @@ public class TimeModule : BaseCommandModule
     {
         if (timezone == null)
         {
-            var timeZoneData = _databaseService.GetTimeZone(ctx.Member.Id);
-            if (timeZoneData != null)
+            var timeZoneInfo = _databaseService.GetTimeZone(ctx.Member.Id);
+            if (timeZoneInfo != null)
             {
-                await ctx.RespondAsync(timeZoneData.TimeZoneDisplayName);
+                await ctx.RespondAsync(timeZoneInfo.DisplayName);
             }
             else
             {
@@ -70,19 +71,19 @@ public class TimeModule : BaseCommandModule
             }
             return;
         }
-        var zone = GetTimeZone(timezone);
+        var zone = GetTimeZone(timezone, ctx.Member.Id);
         if (zone != null)
         {
-            _databaseService.InsertTimeZone(new TimeZoneData { UserId = ctx.Member.Id, TimeZoneDisplayName = zone.DisplayName });
+            _databaseService.InsertTimeZone(new TimeZoneData { UserId = ctx.Member.Id, TimeZoneId = zone.Id });
             await ctx.RespondAsync("Time Zone set");
             return;
         }
         await ctx.RespondAsync("Invalid Time Zone");
     }
 
-    private async Task SendTimeEmbed(CommandContext ctx, string time, string? date, string timezone, TimestampFormat format)
+    private async Task SendTimeEmbed(CommandContext ctx, string time, string? date, string? timezone, TimestampFormat format)
     {
-        var zone = GetTimeZone(timezone);
+        var zone = GetTimeZone(timezone, ctx.Member.Id);
         if (zone == null)
         {
             await ctx.RespondAsync("Invalid timezone");
@@ -123,10 +124,20 @@ public class TimeModule : BaseCommandModule
         return $"{matches.Groups[1].Value}/{matches.Groups[2].Value}/{(year != string.Empty ? year : baseDate.Year)}"; ;
     }
 
-    private TimeZoneInfo? GetTimeZone(string timezone)
+    private TimeZoneInfo? GetTimeZone(string? timezone, ulong uid)
     {
         try
         {
+            if (timezone == null)
+            {
+                var userTimeZone = _databaseService.GetTimeZone(uid);
+                if (userTimeZone != null)
+                {
+                    return userTimeZone;
+                }
+                return TZConvert.GetTimeZoneInfo("utc");
+            }
+
             var success = _timeZones.TryGetValue(timezone, out var result);
             if (!success || result == null)
             {

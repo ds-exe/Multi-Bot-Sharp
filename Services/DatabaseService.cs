@@ -34,7 +34,7 @@ public class DatabaseService
 
     public void InitialiseTables()
     {
-        InitialiseTable("TimeZones(UserId integer PRIMARY KEY, TimeZoneDisplayName)");
+        InitialiseTable("TimeZones(UserId integer PRIMARY KEY, TimeZoneId)");
         InitialiseTable("ResinData(UserId, Game, StartResin int, StartTimestamp int, ResinCapTimestamp int, PRIMARY KEY(UserId, Game))");
     }
 
@@ -48,7 +48,7 @@ public class DatabaseService
     {
         try
         {
-            string query = $"REPLACE INTO Timezones (UserId, TimeZoneDisplayName) VALUES (@UserId, @TimeZoneDisplayName)";
+            string query = $"REPLACE INTO TimeZones (UserId, TimeZoneId) VALUES (@UserId, @TimeZoneId)";
             _connection.Execute(query, tz);
         }
         catch
@@ -57,16 +57,21 @@ public class DatabaseService
         }
     }
 
-    public TimeZoneData? GetTimeZone(ulong UserId)
+    public TimeZoneInfo GetTimeZone(ulong UserId)
     {
         try
         {
-            string query = $"SELECT * FROM Timezones WHERE UserId = @UserId";
-            return _connection.Query<TimeZoneData>(query, new { UserId }).FirstOrDefault();
+            string query = $"SELECT * FROM TimeZones WHERE UserId = @UserId";
+            var data = _connection.Query<TimeZoneData>(query, new { UserId }).FirstOrDefault();
+            if (data == null)
+            {
+                return null;
+            }
+            return TZConvert.GetTimeZoneInfo(data.TimeZoneId);
         }
         catch
         {
-            return null;
+            return TZConvert.GetTimeZoneInfo("utc");
         }
     }
 

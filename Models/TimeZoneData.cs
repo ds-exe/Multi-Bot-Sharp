@@ -4,5 +4,5 @@ public class TimeZoneData
 {
     public ulong UserId { get; set; }
 
-    public string TimeZoneDisplayName { get; set; }
+    public string TimeZoneId { get; set; }
 }
