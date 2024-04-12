@@ -19,6 +19,7 @@ public class EmbedHelper
         embed.Title = $"{GetGameName(resinData.Game)}";
         embed.Description = $"Current Resin: {currentResin}";
         embed.AddField(new DiscordEmbedField("Next alert:", $"tmp", true));
+        embed.AddField(new DiscordEmbedField("\u200b", "\u200b", true));
         embed.AddField(new DiscordEmbedField("Resin full:", resinData.MaxResinTimestamp.Timestamp(), true));
         return embed.Build();
     }
@@ -74,6 +75,7 @@ public class EmbedHelper
         embed.Title = "Added Playlist";
         embed.Description = $"[{playlist.Info.Name}]({url})";
         embed.AddField(new DiscordEmbedField("Playlist Length", $"{playlist.Tracks.Count}", true));
+        embed.AddField(new DiscordEmbedField("\u200b", "\u200b", true));
         embed.AddField(new DiscordEmbedField("Added by", $"<@{user.Id}>", true));
         return embed.Build();
     }
