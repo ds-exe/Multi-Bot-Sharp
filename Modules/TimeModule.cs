@@ -1,5 +1,4 @@
-﻿using DisCatSharp.Entities;
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace Multi_Bot_Sharp.Modules;
 
@@ -7,6 +6,8 @@ public class TimeModule : BaseCommandModule
 {
     private DatabaseService _databaseService;
     private Dictionary<string, string> _timeZones;
+
+    private static readonly string _dateRegex = @"^(\d{2})/(\d{2})/?(\d{4})?$";
 
     public TimeModule(DatabaseService databaseService)
     {
@@ -19,11 +20,16 @@ public class TimeModule : BaseCommandModule
     [Description("Get an embed for a given time/date, optional timezone")]
     public async Task Time(CommandContext ctx, [Description("time - hh:mm")] string time, [Description("optional - region/city or abbreviation")] string? timezone = null)
     {
+        if (timezone != null && IsDate(timezone))
+        {
+            await SendTimeEmbed(ctx, time, timezone, null, TimestampFormat.LongDateTime);
+            return;
+        }
         await SendTimeEmbed(ctx, time, null, timezone, TimestampFormat.LongDateTime);
     }
 
     [Command("time")]
-    public async Task Time(CommandContext ctx, [Description("time - hh:mm")] string time, [Description("date - dd/mm or dd/mm/yyyy")] string date, [Description("region/city or abbreviation")] string timezone)
+    public async Task Time(CommandContext ctx, [Description("time - hh:mm")] string time, [Description("date - dd/mm or dd/mm/yyyy")] string date, [Description("optional - region/city or abbreviation")] string? timezone)
     {
         await SendTimeEmbed(ctx, time, date, timezone, TimestampFormat.LongDateTime);
     }
@@ -32,11 +38,16 @@ public class TimeModule : BaseCommandModule
     [Description("Get an embed for a given time/date, optional timezone")]
     public async Task Until(CommandContext ctx, [Description("time - hh:mm")] string time, [Description("optional - region/city or abbreviation")] string? timezone = null)
     {
+        if (timezone != null && IsDate(timezone))
+        {
+            await SendTimeEmbed(ctx, time, timezone, null, TimestampFormat.RelativeTime);
+            return;
+        }
         await SendTimeEmbed(ctx, time, null, timezone, TimestampFormat.RelativeTime);
     }
 
     [Command("until")]
-    public async Task Until(CommandContext ctx, [Description("time - hh:mm")] string time, [Description("date - dd/mm or dd/mm/yyyy")] string date, [Description("region/city or abbreviation")] string timezone)
+    public async Task Until(CommandContext ctx, [Description("time - hh:mm")] string time, [Description("date - dd/mm or dd/mm/yyyy")] string date, [Description("optional - region/city or abbreviation")] string? timezone)
     {
         await SendTimeEmbed(ctx, time, date, timezone, TimestampFormat.RelativeTime);
     }
@@ -108,6 +119,11 @@ public class TimeModule : BaseCommandModule
         await ctx.RespondAsync(EmbedHelper.GetTimestampEmbed(timestamp));
     }
 
+    private bool IsDate(string date)
+    {
+        return Regex.Match(date, _dateRegex).Success;
+    }
+
     private string? ParseDate(string? date, TimeZoneInfo zone)
     {
         var baseDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zone);
@@ -115,7 +131,7 @@ public class TimeModule : BaseCommandModule
         {
             return baseDate.ToString("dd/MM/yyyy");
         }
-        var matches = Regex.Match(date, @"^(\d{2})/(\d{2})/?(\d{4})?$");
+        var matches = Regex.Match(date, _dateRegex);
         if (!matches.Success)
         {
             return null;

@@ -1,7 +1,5 @@
 ﻿using Dapper;
 using Microsoft.Data.Sqlite;
-using Octokit;
-using SQLitePCL;
 
 namespace Multi_Bot_Sharp.Services;
 
@@ -28,14 +26,14 @@ public class DatabaseService
         }
         catch
         {
-            Console.WriteLine("DB connection error, folder or name error");
+            Console.WriteLine("DB connection error, folder or name invalid");
         }
     }
 
     public void InitialiseTables()
     {
-        InitialiseTable("TimeZones(UserId integer PRIMARY KEY, TimeZoneId)");
-        InitialiseTable("ResinData(UserId, Game, StartResin int, StartTimestamp int, ResinCapTimestamp int, PRIMARY KEY(UserId, Game))");
+        InitialiseTable("TimeZones(UserId INTEGER PRIMARY KEY, TimeZoneId TEXT)");
+        InitialiseTable("ResinData(UserId TEXT, Game TEXT, ResinCapTimestamp INTEGER, PRIMARY KEY(UserId, Game))");
     }
 
     public void InitialiseTable(string table)
@@ -57,7 +55,7 @@ public class DatabaseService
         }
     }
 
-    public TimeZoneInfo GetTimeZone(ulong UserId)
+    public TimeZoneInfo? GetTimeZone(ulong UserId)
     {
         try
         {
