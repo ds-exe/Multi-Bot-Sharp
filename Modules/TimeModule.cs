@@ -4,12 +4,14 @@ namespace Multi_Bot_Sharp.Modules;
 
 public class TimeModule : BaseCommandModule
 {
-    private Dictionary<string, string> timezones;
+    private DatabaseService _databaseService;
+    private Dictionary<string, string> _timeZones;
 
-    public TimeModule()
+    public TimeModule(DatabaseService databaseService)
     {
-        var text = ConfigHelper.GetJsonText("timezones");
-        timezones = JsonSerializer.Deserialize<Dictionary<string, string>>(text) ?? new();
+        _databaseService = databaseService;
+        var text = ConfigHelper.GetJsonText("TimeZones");
+        _timeZones = JsonSerializer.Deserialize<Dictionary<string, string>>(text) ?? new();
     }
 
     [Command("time")]
@@ -50,6 +52,32 @@ public class TimeModule : BaseCommandModule
         }
 
         await ctx.RespondAsync($"`{TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zone).ToString("dd MMM yyyy, HH:mm")}`");
+    }
+
+    [Command("timezone")]
+    public async Task TimeZone(CommandContext ctx, string? timezone = null)
+    {
+        if (timezone == null)
+        {
+            var timeZoneData = _databaseService.GetTimeZone(ctx.Member.Id);
+            if (timeZoneData != null)
+            {
+                await ctx.RespondAsync(timeZoneData.TimeZoneDisplayName);
+            }
+            else
+            {
+                await ctx.RespondAsync("No Time Zone data set");
+            }
+            return;
+        }
+        var zone = GetTimeZone(timezone);
+        if (zone != null)
+        {
+            _databaseService.InsertTimeZone(new TimeZoneData { UserId = ctx.Member.Id, TimeZoneDisplayName = zone.DisplayName });
+            await ctx.RespondAsync("Time Zone set");
+            return;
+        }
+        await ctx.RespondAsync("Invalid Time Zone");
     }
 
     private async Task SendTimeEmbed(CommandContext ctx, string time, string? date, string timezone, TimestampFormat format)
@@ -99,7 +127,7 @@ public class TimeModule : BaseCommandModule
     {
         try
         {
-            var success = timezones.TryGetValue(timezone, out var result);
+            var success = _timeZones.TryGetValue(timezone, out var result);
             if (!success || result == null)
             {
                 return TZConvert.GetTimeZoneInfo(timezone);

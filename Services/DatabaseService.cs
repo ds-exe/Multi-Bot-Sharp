@@ -1,5 +1,7 @@
 ﻿using Dapper;
 using Microsoft.Data.Sqlite;
+using Octokit;
+using SQLitePCL;
 
 namespace Multi_Bot_Sharp.Services;
 
@@ -32,28 +34,39 @@ public class DatabaseService
 
     public void InitialiseTables()
     {
-        InitialiseTable("ResinData(userID, game, startResin int, startTimestamp int, resinCapTimestamp int, PRIMARY KEY(userID, game))");
+        InitialiseTable("TimeZones(UserId integer PRIMARY KEY, TimeZoneDisplayName)");
+        InitialiseTable("ResinData(UserId, Game, StartResin int, StartTimestamp int, ResinCapTimestamp int, PRIMARY KEY(UserId, Game))");
     }
 
     public void InitialiseTable(string table)
     {
         string query = $"CREATE TABLE IF NOT EXISTS {table}";
-        var command = new SqliteCommand(query, _connection);
-        command.ExecuteNonQuery();
+        _connection.Execute(query);
     }
 
-    private void InsertTest(string table)
+    public void InsertTimeZone(TimeZoneData tz)
     {
         try
         {
-            string query = $"INSERT INTO {table} (columns) VALUES (@value)";
-            var command = new SqliteCommand(query, _connection);
-            command.Parameters.AddWithValue("@value", "value");
-            command.ExecuteNonQueryAsync();
+            string query = $"REPLACE INTO Timezones (UserId, TimeZoneDisplayName) VALUES (@UserId, @TimeZoneDisplayName)";
+            _connection.Execute(query, tz);
         }
         catch
         {
 
+        }
+    }
+
+    public TimeZoneData? GetTimeZone(ulong UserId)
+    {
+        try
+        {
+            string query = $"SELECT * FROM Timezones WHERE UserId = @UserId";
+            return _connection.Query<TimeZoneData>(query, new { UserId }).FirstOrDefault();
+        }
+        catch
+        {
+            return null;
         }
     }
 

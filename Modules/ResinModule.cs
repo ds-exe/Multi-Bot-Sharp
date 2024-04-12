@@ -10,7 +10,7 @@ public class ResinModule : BaseCommandModule
         { "genshin", new Game{ MaxResin = 160, ResinsMins = 8 } },
     };
 
-    DatabaseService _databaseService;
+    private DatabaseService _databaseService;
 
     public ResinModule(DatabaseService databaseService)
     {
