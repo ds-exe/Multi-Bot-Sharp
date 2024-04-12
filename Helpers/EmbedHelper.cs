@@ -19,7 +19,7 @@ public class EmbedHelper
         embed.Title = $"{GetGameName(resinData.Game)}";
         embed.Description = $"Current Resin: {currentResin}";
         embed.AddField(new DiscordEmbedField("Next alert:", $"tmp", true));
-        embed.AddField(new DiscordEmbedField("Resin full:", resinData.MaxResinTimestamp.Timestamp()));
+        embed.AddField(new DiscordEmbedField("Resin full:", resinData.MaxResinTimestamp.Timestamp(), true));
         return embed.Build();
     }
 
