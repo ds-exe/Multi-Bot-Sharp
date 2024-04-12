@@ -2,10 +2,31 @@
 
 public class EmbedHelper
 {
+    private static string GetGameName(string game)
+    {
+        var _resinMap = new Dictionary<string, string>()
+        {
+            { "hsr", "Honkai: Star Rail "},
+            { "genshin", "Genshin" }
+        };
+        return _resinMap[game];
+    }
+
+    public static DiscordEmbed GetResinEmbed(ResinData resinData, int currentResin)
+    {
+        var embed = new DiscordEmbedBuilder();
+        embed.Color = new DiscordColor("0099ff");
+        embed.Title = $"{GetGameName(resinData.Game)}";
+        embed.Description = $"Current Resin: {currentResin}";
+        embed.AddField(new DiscordEmbedField("Next alert:", $"tmp", true));
+        embed.AddField(new DiscordEmbedField("Resin full:", resinData.MaxResinTimestamp.Timestamp()));
+        return embed.Build();
+    }
+
     public static DiscordEmbed GetTimestampEmbed(string time)
     {
         var embed = new DiscordEmbedBuilder();
-        embed.Color = new DiscordColor("00FFFF");
+        embed.Color = new DiscordColor("00ffff");
         embed.Title = "Local time:";
         embed.Description = time;
         embed.AddField(new DiscordEmbedField("Copy Link:", $"\\{time}"));

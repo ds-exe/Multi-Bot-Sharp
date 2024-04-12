@@ -4,10 +4,10 @@
 [Description("Resin commands")]
 public class ResinModule : BaseCommandModule
 {
-    private readonly Dictionary<string, Game> games = new Dictionary<string, Game>()
+    private readonly Dictionary<string, GameResin> games = new Dictionary<string, GameResin>()
     {
-        { "hsr", new Game{ MaxResin = 240, ResinsMins = 6 } },
-        { "genshin", new Game{ MaxResin = 160, ResinsMins = 8 } },
+        { "hsr", new GameResin{ MaxResin = 240, ResinsMins = 6 } },
+        { "genshin", new GameResin{ MaxResin = 160, ResinsMins = 8 } },
     };
 
     private DatabaseService _databaseService;
@@ -27,12 +27,45 @@ public class ResinModule : BaseCommandModule
 
         if (resin == null)
         {
-            await ctx.RespondAsync($"Print {game} resin embed");
+            await SendResinData(ctx, game);
             return;
         }
 
-        await _databaseService.GetResinData();
-        await ctx.RespondAsync("TODO");
+        if (resin < 0)
+        {
+            //TODO Reduce resin function
+            await ctx.RespondAsync("TODO Reduce resin function");
+            return;
+        }
+
+        SetResinData(ctx, game, (int)resin);
+    }
+
+    private async Task SendResinData(CommandContext ctx, string game)
+    {
+        var resinData = _databaseService.GetResinData(ctx.Member.Id, game);
+        if (resinData == null)
+        {
+            await ctx.RespondAsync($"No game data found");
+        }
+        else
+        {
+            await ctx.RespondAsync(EmbedHelper.GetResinEmbed(resinData, GetCurrentResin(resinData)));
+        }
+        return;
+    }
+
+    private void SetResinData(CommandContext ctx, string game, int resin)
+    {
+        var fullTime = DateTime.UtcNow.AddMinutes((games[game].MaxResin - resin) * games[game].ResinsMins);
+        _databaseService.InsertResinData(new ResinData { UserId = ctx.Member.Id, Game = game, MaxResinTimestamp = fullTime });
+    }
+
+    private int GetCurrentResin(ResinData resinData)
+    {
+        return (int)Math.Floor(games[resinData.Game].MaxResin -
+            (resinData.MaxResinTimestamp - DateTime.UtcNow).TotalMinutes /
+            games[resinData.Game].ResinsMins);
     }
 
     [GroupCommand, Command("hsr")]

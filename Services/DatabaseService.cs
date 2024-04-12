@@ -32,8 +32,8 @@ public class DatabaseService
 
     public void InitialiseTables()
     {
-        InitialiseTable("TimeZones(UserId INTEGER PRIMARY KEY, TimeZoneId TEXT)");
-        InitialiseTable("ResinData(UserId TEXT, Game TEXT, ResinCapTimestamp INTEGER, PRIMARY KEY(UserId, Game))");
+        InitialiseTable("TimeZoneData(UserId INTEGER PRIMARY KEY, TimeZoneId TEXT)");
+        InitialiseTable("ResinData(UserId TEXT, Game TEXT, MaxResinTimestamp INTEGER, PRIMARY KEY(UserId, Game))");
     }
 
     public void InitialiseTable(string table)
@@ -46,7 +46,7 @@ public class DatabaseService
     {
         try
         {
-            string query = $"REPLACE INTO TimeZones (UserId, TimeZoneId) VALUES (@UserId, @TimeZoneId)";
+            string query = $"REPLACE INTO TimeZoneData (UserId, TimeZoneId) VALUES (@UserId, @TimeZoneId)";
             _connection.Execute(query, tz);
         }
         catch
@@ -55,12 +55,12 @@ public class DatabaseService
         }
     }
 
-    public TimeZoneInfo? GetTimeZone(ulong UserId)
+    public TimeZoneInfo? GetTimeZone(ulong userId)
     {
         try
         {
-            string query = $"SELECT * FROM TimeZones WHERE UserId = @UserId";
-            var data = _connection.Query<TimeZoneData>(query, new { UserId }).FirstOrDefault();
+            string query = $"SELECT * FROM TimeZoneData WHERE UserId = @userId";
+            var data = _connection.Query<TimeZoneData>(query, new { userId }).FirstOrDefault();
             if (data == null)
             {
                 return null;
@@ -73,13 +73,25 @@ public class DatabaseService
         }
     }
 
-    public async Task<Resin?> GetResinData()
+    public void InsertResinData(ResinData resinData)
     {
         try
         {
-            var query = "SELECT * FROM ResinData";
-            var results = await _connection.QueryAsync<Resin>(query);
-            return results.FirstOrDefault();
+            string query = $"REPLACE INTO ResinData (UserId, Game, MaxResinTimestamp) VALUES (@UserId, @Game, @MaxResinTimestamp)";
+            _connection.Execute(query, resinData);
+        }
+        catch
+        {
+
+        }
+    }
+
+    public ResinData? GetResinData(ulong userId, string game)
+    {
+        try
+        {
+            var query = "SELECT * FROM ResinData WHERE UserId = @userId AND Game = @game";
+            return _connection.Query<ResinData>(query, new { userId, game }).FirstOrDefault();
         }
         catch
         {

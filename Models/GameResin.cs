@@ -1,6 +1,6 @@
 ﻿namespace Multi_Bot_Sharp.Models;
 
-public class Game
+public class GameResin
 {
     public int MaxResin { get; set; }
 
