@@ -1,12 +1,12 @@
-﻿namespace Multi_Bot_Sharp.Modules;
+﻿namespace Multi_Bot_Sharp.Helpers;
 
-public class CustomHelpFormatter : DefaultHelpFormatter
+public class CustomFormatHelper : DefaultHelpFormatter
 {
     private const ulong creatorID = 74968333413257216;
     private DiscordUser User;
     private string EmbedThumbnail;
 
-    public CustomHelpFormatter(CommandContext ctx) : base(ctx)
+    public CustomFormatHelper(CommandContext ctx) : base(ctx)
     {
         _ = InitialiseEmbeds(ctx.Client);
     }

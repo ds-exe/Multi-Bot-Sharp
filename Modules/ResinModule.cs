@@ -1,6 +1,6 @@
 ﻿namespace Multi_Bot_Sharp.Modules;
 
-[Group("resin")]
+[Group("resin"), Aliases("hsr")]
 [Description("Resin commands")]
 public class ResinModule : BaseCommandModule
 {
@@ -37,6 +37,12 @@ public class ResinModule : BaseCommandModule
             return;
         }
 
+        if (resin > games[game].MaxResin)
+        {
+            await ctx.RespondAsync("Resin value too high");
+            return;
+        }
+
         var fullTime = DateTime.UtcNow.AddMinutes((games[game].MaxResin - (int)resin) * games[game].ResinsMins);
         SetResinData(ctx, game, fullTime);
     }
@@ -52,7 +58,6 @@ public class ResinModule : BaseCommandModule
         {
             await ctx.RespondAsync(EmbedHelper.GetResinEmbed(resinData, GetCurrentResin(resinData)));
         }
-        return;
     }
 
     private async Task ReduceResinData(CommandContext ctx, string game, int resin)
@@ -71,7 +76,6 @@ public class ResinModule : BaseCommandModule
             }
             SetResinData(ctx, game, resinData.MaxResinTimestamp.AddMinutes(resin * games[game].ResinsMins));
         }
-        return;
     }
 
     private void SetResinData(CommandContext ctx, string game, DateTime fullTime)
@@ -80,14 +84,47 @@ public class ResinModule : BaseCommandModule
         _databaseService.InsertResinData(resinData);
 
         ctx.RespondAsync(EmbedHelper.GetResinEmbed(resinData, GetCurrentResin(resinData)));
-        // Set notifications
+
+        SetResinNotifications(ctx, resinData);
+    }
+
+    private void SetResinNotifications(CommandContext ctx, ResinData resinData)
+    {
+        _databaseService.ClearOldResinNotifications(ctx.Member.Id, resinData.Game);
+        var currentResin = GetCurrentResin(resinData);
+        if (currentResin >= games[resinData.Game].MaxResin)
+        {
+            return;
+        }
+        SetResinNotification(ctx, resinData, games[resinData.Game].MaxResin);
+        if (currentResin >= games[resinData.Game].MaxResin - 20)
+        {
+            return;
+        }
+        SetResinNotification(ctx, resinData, games[resinData.Game].MaxResin - 20);
+        if (currentResin >= 120)
+        {
+            return;
+        }
+        SetResinNotification(ctx, resinData, 120);
+    }
+
+    private void SetResinNotification(CommandContext ctx, ResinData resinData, int notificationResin)
+    {
+        var timeAdjustment = (games[resinData.Game].MaxResin - notificationResin) * games[resinData.Game].ResinsMins;
+        var notificationTimestamp = resinData.MaxResinTimestamp.AddMinutes(-timeAdjustment);
+        var maxResinNotification = new ResinNotification { UserId = ctx.Member.Id, Game = resinData.Game, NotificationResin = notificationResin, 
+            NotificationTimestamp =  notificationTimestamp, MaxResinTimestamp = resinData.MaxResinTimestamp };
+
+        _databaseService.InsertResinNotification(maxResinNotification);
     }
 
     private int GetCurrentResin(ResinData resinData)
     {
-        return (int)Math.Floor(games[resinData.Game].MaxResin -
+        return (int)Math.Min(Math.Floor(games[resinData.Game].MaxResin -
             (resinData.MaxResinTimestamp - DateTime.UtcNow).TotalMinutes /
-            games[resinData.Game].ResinsMins);
+            games[resinData.Game].ResinsMins),
+            games[resinData.Game].MaxResin);
     }
 
     [GroupCommand, Command("hsr")]
@@ -106,8 +143,8 @@ public class ResinModule : BaseCommandModule
         return;
     }
 
-    [Command("notify")]
-    [Description("Set a custom notification time")]
+    //[Command("notify")]
+    //[Description("Set a custom notification time")]
     public async Task Notify(CommandContext ctx, int resin = 0)
     {
         if (resin < 30)

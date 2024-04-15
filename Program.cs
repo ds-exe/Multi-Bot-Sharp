@@ -37,7 +37,7 @@
             });
 
             commands.RegisterCommands(Assembly.GetExecutingAssembly());
-            commands.SetHelpFormatter<CustomHelpFormatter>();
+            commands.SetHelpFormatter<CustomFormatHelper>();
 
             await discord.ConnectAsync();
             await Task.Delay(15 * 1000);

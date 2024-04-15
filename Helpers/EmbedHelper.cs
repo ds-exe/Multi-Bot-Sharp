@@ -89,7 +89,7 @@ public class EmbedHelper
         }
         var helpCommand = ctx.CommandsNext.FindCommand("help", out var _);
         var commandContext = ctx.CommandsNext.CreateContext(ctx.Message, ctx.Prefix, helpCommand, "perms");
-        var customHelpMessage = new CustomHelpFormatter(commandContext).WithCommand(command);
+        var customHelpMessage = new CustomFormatHelper(commandContext).WithCommand(command);
         if (command is CommandGroup)
         {
             customHelpMessage.WithSubcommands(((CommandGroup)command).Children);

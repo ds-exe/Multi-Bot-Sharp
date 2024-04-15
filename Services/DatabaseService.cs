@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microsoft.Data.Sqlite;
+using Multi_Bot_Sharp.Models;
 
 namespace Multi_Bot_Sharp.Services;
 
@@ -32,8 +33,17 @@ public class DatabaseService
 
     public void InitialiseTables()
     {
-        InitialiseTable("TimeZoneData(UserId INTEGER PRIMARY KEY, TimeZoneId TEXT)");
-        InitialiseTable("ResinData(UserId TEXT, Game TEXT, MaxResinTimestamp INTEGER, PRIMARY KEY(UserId, Game))");
+        try
+        {
+            InitialiseTable("TimeZoneData(UserId INTEGER PRIMARY KEY, TimeZoneId TEXT)");
+            InitialiseTable("ResinData(UserId INTEGER, Game TEXT, MaxResinTimestamp INTEGER, PRIMARY KEY(UserId, Game))");
+            InitialiseTable("ResinNotification(UserId INTEGER, Game TEXT, NotificationResin INTEGER, NotificationTimestamp INTEGER, " +
+                "MaxResinTimestamp INTEGER, PRIMARY KEY(UserId, Game, NotificationResin))");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("help");
+        }
     }
 
     public void InitialiseTable(string table)
@@ -97,5 +107,25 @@ public class DatabaseService
         {
             return null;
         }
+    }
+
+    public void InsertResinNotification(ResinNotification resinNotification)
+    {
+        try
+        {
+            string query = $"REPLACE INTO ResinNotification (UserId, Game, NotificationResin, NotificationTimestamp, MaxResinTimestamp) VALUES " +
+                $"(@UserId, @Game, @NotificationResin, @NotificationTimestamp, @MaxResinTimestamp)";
+            _connection.Execute(query, resinNotification);
+        }
+        catch
+        {
+
+        }
+    }
+
+    public void ClearOldResinNotifications(ulong userId, string game)
+    {
+        string query = $"DELETE FROM ResinNotification WHERE UserId = @userId AND Game = @game";
+        _connection.Execute(query, new { userId, game });
     }
 }
