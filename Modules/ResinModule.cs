@@ -33,12 +33,12 @@ public class ResinModule : BaseCommandModule
 
         if (resin < 0)
         {
-            //TODO Reduce resin function
-            await ctx.RespondAsync("TODO Reduce resin function");
+            await ReduceResinData(ctx, game, Math.Abs((int)resin));
             return;
         }
 
-        SetResinData(ctx, game, (int)resin);
+        var fullTime = DateTime.UtcNow.AddMinutes((games[game].MaxResin - (int)resin) * games[game].ResinsMins);
+        SetResinData(ctx, game, fullTime);
     }
 
     private async Task SendResinData(CommandContext ctx, string game)
@@ -55,10 +55,32 @@ public class ResinModule : BaseCommandModule
         return;
     }
 
-    private void SetResinData(CommandContext ctx, string game, int resin)
+    private async Task ReduceResinData(CommandContext ctx, string game, int resin)
     {
-        var fullTime = DateTime.UtcNow.AddMinutes((games[game].MaxResin - resin) * games[game].ResinsMins);
-        _databaseService.InsertResinData(new ResinData { UserId = ctx.Member.Id, Game = game, MaxResinTimestamp = fullTime });
+        var resinData = _databaseService.GetResinData(ctx.Member.Id, game);
+        if (resinData == null)
+        {
+            await ctx.RespondAsync($"No game data found");
+        }
+        else
+        {
+            if (GetCurrentResin(resinData) - resin < 0)
+            {
+                await ctx.RespondAsync($"Not enough resin to reduce");
+                return;
+            }
+            SetResinData(ctx, game, resinData.MaxResinTimestamp.AddMinutes(resin * games[game].ResinsMins));
+        }
+        return;
+    }
+
+    private void SetResinData(CommandContext ctx, string game, DateTime fullTime)
+    {
+        var resinData = new ResinData { UserId = ctx.Member.Id, Game = game, MaxResinTimestamp = fullTime };
+        _databaseService.InsertResinData(resinData);
+
+        ctx.RespondAsync(EmbedHelper.GetResinEmbed(resinData, GetCurrentResin(resinData)));
+        // Set notifications
     }
 
     private int GetCurrentResin(ResinData resinData)
