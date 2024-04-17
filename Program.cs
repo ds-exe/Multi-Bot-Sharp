@@ -25,9 +25,12 @@
 
             var lavalink = discord.UseLavalink();
 
+            var db = new DatabaseService();
+
             var services = new ServiceCollection()
                 .AddSingleton<QueueService>()
-                .AddSingleton<DatabaseService>()
+                .AddSingleton(db)
+                .AddSingleton(discord)
                 .BuildServiceProvider();
 
             var commands = discord.UseCommandsNext(new CommandsNextConfiguration()

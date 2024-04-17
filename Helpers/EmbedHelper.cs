@@ -24,6 +24,26 @@ public class EmbedHelper
         return embed.Build();
     }
 
+    public static DiscordComponent[] GetButtons(int resin)
+    {
+        return
+        [
+            new DiscordButtonComponent(ButtonStyle.Secondary, "lowResin", "-10"),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "midResin", "-30"),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "highResin", "-40")
+        ];
+    }
+
+    public static DiscordComponent[] GetButtons2(int resin)
+    {
+        return
+        [
+            new DiscordButtonComponent(ButtonStyle.Secondary, "customResin", $"-{resin}", resin <= 0),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "customResin2", $"-{resin * 2}", resin <= 0),
+            new DiscordButtonComponent(ButtonStyle.Primary, "refresh", "↻")
+        ];
+    }
+
     public static DiscordEmbed GetTimestampEmbed(string time)
     {
         var embed = new DiscordEmbedBuilder();

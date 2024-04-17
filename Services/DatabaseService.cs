@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using Microsoft.Data.Sqlite;
-using Multi_Bot_Sharp.Models;
 
 namespace Multi_Bot_Sharp.Services;
 
@@ -42,7 +41,7 @@ public class DatabaseService
         }
         catch (Exception ex)
         {
-            Console.WriteLine("help");
+
         }
     }
 
