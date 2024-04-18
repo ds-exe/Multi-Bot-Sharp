@@ -65,8 +65,10 @@ public class ResinModule : BaseCommandModule
         }
         else
         {
+            var nextNotification = _databaseService.GetNextResinNotification(resinData);
+
             var responseMessage = new DiscordMessageBuilder()
-                .AddEmbed(EmbedHelper.GetResinEmbed(resinData, GetCurrentResin(resinData)))
+                .AddEmbed(EmbedHelper.GetResinEmbed(resinData, nextNotification, GetCurrentResin(resinData)))
                 .AddComponents(EmbedHelper.GetButtons(120))
                 .AddComponents(EmbedHelper.GetButtons2(120));
 
@@ -127,8 +129,8 @@ public class ResinModule : BaseCommandModule
     {
         var timeAdjustment = (games[resinData.Game].MaxResin - notificationResin) * games[resinData.Game].ResinsMins;
         var notificationTimestamp = resinData.MaxResinTimestamp.AddMinutes(-timeAdjustment);
-        var maxResinNotification = new ResinNotification { UserId = userId, Game = resinData.Game, NotificationResin = notificationResin, 
-            NotificationTimestamp =  notificationTimestamp, MaxResinTimestamp = resinData.MaxResinTimestamp };
+        var maxResinNotification = new ResinNotification { UserId = userId, Game = resinData.Game,
+            NotificationTimestamp = notificationTimestamp, MaxResinTimestamp = resinData.MaxResinTimestamp };
 
         _databaseService.InsertResinNotification(maxResinNotification);
     }
@@ -182,19 +184,22 @@ public class ResinModule : BaseCommandModule
     {
         var timeNow = DateTime.UtcNow;
         var resinNotifications = _databaseService.GetElapsedResinNotifications(timeNow);
+        _databaseService.DeleteElapsedResinNotifications(timeNow);
+
         foreach (var resinNotification in resinNotifications)
         {
             try
             {
                 var user = await _discordClient.GetUserAsync(resinNotification.UserId);
 
+                var nextNotification = _databaseService.GetNextResinNotification(resinNotification);
+
                 var responseMessage = new DiscordMessageBuilder()
-                    .AddEmbed(EmbedHelper.GetResinEmbed(resinNotification, GetCurrentResin(resinNotification)))
+                    .AddEmbed(EmbedHelper.GetResinEmbed(resinNotification, nextNotification, GetCurrentResin(resinNotification)))
                     .AddComponents(EmbedHelper.GetButtons(120))
                     .AddComponents(EmbedHelper.GetButtons2(120));
 
                 await user.SendMessageAsync(responseMessage);
-                _databaseService.DeleteResinNotification(resinNotification.UserId, resinNotification.Game, timeNow);
             }
             catch { }
         }

@@ -12,15 +12,20 @@ public class EmbedHelper
         return _resinMap[game];
     }
 
-    public static DiscordEmbed GetResinEmbed(ResinData resinData, int currentResin)
+    public static DiscordEmbed GetResinEmbed(ResinData resinData, ResinNotification? nextNotification, int currentResin)
     {
         var embed = new DiscordEmbedBuilder();
         embed.Color = new DiscordColor("0099ff");
         embed.Title = $"{GetGameName(resinData.Game)}";
         embed.Description = $"Current Resin: {currentResin}";
-        embed.AddField(new DiscordEmbedField("Next alert:", $"tmp", true));
-        embed.AddField(new DiscordEmbedField("\u200b", "\u200b", true));
-        embed.AddField(new DiscordEmbedField("Resin full:", resinData.MaxResinTimestamp.Timestamp(), true));
+        if (nextNotification != null )
+        {
+            var utcNotificationTime = DateTime.SpecifyKind(nextNotification.NotificationTimestamp, DateTimeKind.Utc);
+            embed.AddField(new DiscordEmbedField("Next alert:", $"{utcNotificationTime.Timestamp()}", true));
+            embed.AddField(new DiscordEmbedField("\u200b", "\u200b", true));
+        }
+        var utcMaxResinTime = DateTime.SpecifyKind(resinData.MaxResinTimestamp, DateTimeKind.Utc);
+        embed.AddField(new DiscordEmbedField("Resin full:", utcMaxResinTime.Timestamp(), true));
         return embed.Build();
     }
 

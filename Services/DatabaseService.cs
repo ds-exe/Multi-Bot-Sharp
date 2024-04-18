@@ -34,8 +34,8 @@ public class DatabaseService
     {
         InitialiseTable("TimeZoneData(UserId INTEGER PRIMARY KEY, TimeZoneId TEXT)");
         InitialiseTable("ResinData(UserId INTEGER, Game TEXT, MaxResinTimestamp INTEGER, PRIMARY KEY(UserId, Game))");
-        InitialiseTable("ResinNotification(UserId INTEGER, Game TEXT, NotificationResin INTEGER, NotificationTimestamp INTEGER, " +
-            "MaxResinTimestamp INTEGER, PRIMARY KEY(UserId, Game, NotificationResin))");
+        InitialiseTable("ResinNotification(UserId INTEGER, Game TEXT, NotificationTimestamp INTEGER, " +
+            "MaxResinTimestamp INTEGER, PRIMARY KEY(UserId, Game, NotificationTimestamp))");
     }
 
     public void InitialiseTable(string table)
@@ -99,8 +99,8 @@ public class DatabaseService
     {
         try
         {
-            string query = $"REPLACE INTO ResinNotification (UserId, Game, NotificationResin, NotificationTimestamp, MaxResinTimestamp) VALUES " +
-                $"(@UserId, @Game, @NotificationResin, @NotificationTimestamp, @MaxResinTimestamp)";
+            string query = $"REPLACE INTO ResinNotification (UserId, Game, NotificationTimestamp, MaxResinTimestamp) VALUES " +
+                $"(@UserId, @Game, @NotificationTimestamp, @MaxResinTimestamp)";
             _connection.Execute(query, resinNotification);
         }
         catch { }
@@ -129,12 +129,32 @@ public class DatabaseService
         }
     }
 
-    public void DeleteResinNotification(ulong userId, string game, DateTime timeNow)
+    public ResinNotification? GetNextResinNotification(ResinData resinData)
     {
         try
         {
-            string query = $"DELETE FROM ResinNotification WHERE UserId = @userId AND Game = @game AND NotificationTimestamp <= @timeNow";
-            _connection.Execute(query, new { userId, game, timeNow });
+            string query = $"SELECT * FROM ResinNotification WHERE UserId = @UserId AND Game = @Game";
+            var notifications = _connection.Query<ResinNotification>(query, resinData);
+            var response = notifications.FirstOrDefault();
+            foreach (var notification in notifications)
+            {
+                if (notification.NotificationTimestamp < response?.NotificationTimestamp)
+                {
+                    response = notification;
+                }
+            }
+            return response;
+        }
+        catch { }
+        return null;
+    }
+
+    public void DeleteElapsedResinNotifications(DateTime timeNow)
+    {
+        try
+        {
+            string query = $"DELETE FROM ResinNotification WHERE NotificationTimestamp <= @timeNow";
+            _connection.Execute(query, new { timeNow });
         }
         catch { }
     }
