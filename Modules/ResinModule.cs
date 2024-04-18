@@ -12,10 +12,12 @@ public class ResinModule : BaseCommandModule
 
     private DatabaseService _databaseService;
     private static System.Timers.Timer _timer;
+    private static DiscordClient _discordClient;
 
     public ResinModule(DiscordClient client, DatabaseService databaseService)
     {
         _databaseService = databaseService;
+        _discordClient = client;
 
         client.ComponentInteractionCreated += async (s, e) =>
         {
@@ -34,13 +36,13 @@ public class ResinModule : BaseCommandModule
 
         if (resin == null)
         {
-            await SendResinData(ctx.Message, ctx.Member.Id, game);
+            await SendResinData(ctx.Message, ctx.Message.Author.Id, game);
             return;
         }
 
         if (resin < 0)
         {
-            await ReduceResinData(ctx.Message, ctx.Member.Id, game, Math.Abs((int)resin));
+            await ReduceResinData(ctx.Message, ctx.Message.Author.Id, game, Math.Abs((int)resin));
             return;
         }
 
@@ -51,7 +53,7 @@ public class ResinModule : BaseCommandModule
         }
 
         var fullTime = DateTime.UtcNow.AddMinutes((games[game].MaxResin - (int)resin) * games[game].ResinsMins);
-        await SetResinData(ctx.Message, ctx.Member.Id, game, fullTime);
+        await SetResinData(ctx.Message, ctx.Message.Author.Id, game, fullTime);
     }
 
     private async Task SendResinData(DiscordMessage message, ulong userId, string game)
@@ -70,14 +72,6 @@ public class ResinModule : BaseCommandModule
 
             await message.RespondAsync(responseMessage);
         }
-    }
-
-    private static DiscordFollowupMessageBuilder GetResinDataMessage(ResinData resinData)
-    {
-        return new DiscordFollowupMessageBuilder()
-            .AddEmbed(EmbedHelper.GetResinEmbed(resinData, GetCurrentResin(resinData)))
-            .AddComponents(EmbedHelper.GetButtons(120))
-            .AddComponents(EmbedHelper.GetButtons2(120));
     }
 
     private async Task ReduceResinData(DiscordMessage message, ulong userId, string game, int resin)
@@ -103,9 +97,9 @@ public class ResinModule : BaseCommandModule
         var resinData = new ResinData { UserId = userId, Game = game, MaxResinTimestamp = fullTime };
         _databaseService.InsertResinData(resinData);
 
-        await SendResinData(message, userId, game);
-
         SetResinNotifications(message, userId, resinData);
+
+        await SendResinData(message, userId, game);
     }
 
     private void SetResinNotifications(DiscordMessage message, ulong userId, ResinData resinData)
@@ -184,10 +178,26 @@ public class ResinModule : BaseCommandModule
         _timer.Enabled = true;
     }
 
-    public void SendNotifications(Object? source, ElapsedEventArgs e)
+    public async void SendNotifications(Object? source, ElapsedEventArgs e)
     {
-        // TODO: send and delete ready notifications
-        Console.WriteLine("triggered");
+        var timeNow = DateTime.UtcNow;
+        var resinNotifications = _databaseService.GetElapsedResinNotifications(timeNow);
+        foreach (var resinNotification in resinNotifications)
+        {
+            try
+            {
+                var user = await _discordClient.GetUserAsync(resinNotification.UserId);
+
+                var responseMessage = new DiscordMessageBuilder()
+                    .AddEmbed(EmbedHelper.GetResinEmbed(resinNotification, GetCurrentResin(resinNotification)))
+                    .AddComponents(EmbedHelper.GetButtons(120))
+                    .AddComponents(EmbedHelper.GetButtons2(120));
+
+                await user.SendMessageAsync(responseMessage);
+                _databaseService.DeleteResinNotification(resinNotification.UserId, resinNotification.Game, timeNow);
+            }
+            catch { }
+        }
     }
 
     async Task HandleButtons(ComponentInteractionCreateEventArgs e)
@@ -216,7 +226,7 @@ public class ResinModule : BaseCommandModule
             case "customResin2":
                 await ReduceResinData(e.Message, e.User.Id, game, 240);
                 break;
-            default:
+            case "refresh":
                 await SendResinData(e.Message, e.User.Id, game);
                 break;
         }

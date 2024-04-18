@@ -32,17 +32,10 @@ public class DatabaseService
 
     public void InitialiseTables()
     {
-        try
-        {
-            InitialiseTable("TimeZoneData(UserId INTEGER PRIMARY KEY, TimeZoneId TEXT)");
-            InitialiseTable("ResinData(UserId INTEGER, Game TEXT, MaxResinTimestamp INTEGER, PRIMARY KEY(UserId, Game))");
-            InitialiseTable("ResinNotification(UserId INTEGER, Game TEXT, NotificationResin INTEGER, NotificationTimestamp INTEGER, " +
-                "MaxResinTimestamp INTEGER, PRIMARY KEY(UserId, Game, NotificationResin))");
-        }
-        catch (Exception ex)
-        {
-
-        }
+        InitialiseTable("TimeZoneData(UserId INTEGER PRIMARY KEY, TimeZoneId TEXT)");
+        InitialiseTable("ResinData(UserId INTEGER, Game TEXT, MaxResinTimestamp INTEGER, PRIMARY KEY(UserId, Game))");
+        InitialiseTable("ResinNotification(UserId INTEGER, Game TEXT, NotificationResin INTEGER, NotificationTimestamp INTEGER, " +
+            "MaxResinTimestamp INTEGER, PRIMARY KEY(UserId, Game, NotificationResin))");
     }
 
     public void InitialiseTable(string table)
@@ -58,10 +51,7 @@ public class DatabaseService
             string query = $"REPLACE INTO TimeZoneData (UserId, TimeZoneId) VALUES (@UserId, @TimeZoneId)";
             _connection.Execute(query, tz);
         }
-        catch
-        {
-
-        }
+        catch { }
     }
 
     public TimeZoneInfo? GetTimeZone(ulong userId)
@@ -89,10 +79,7 @@ public class DatabaseService
             string query = $"REPLACE INTO ResinData (UserId, Game, MaxResinTimestamp) VALUES (@UserId, @Game, @MaxResinTimestamp)";
             _connection.Execute(query, resinData);
         }
-        catch
-        {
-
-        }
+        catch { }
     }
 
     public ResinData? GetResinData(ulong userId, string game)
@@ -116,15 +103,39 @@ public class DatabaseService
                 $"(@UserId, @Game, @NotificationResin, @NotificationTimestamp, @MaxResinTimestamp)";
             _connection.Execute(query, resinNotification);
         }
-        catch
-        {
-
-        }
+        catch { }
     }
 
     public void ClearOldResinNotifications(ulong userId, string game)
     {
-        string query = $"DELETE FROM ResinNotification WHERE UserId = @userId AND Game = @game";
-        _connection.Execute(query, new { userId, game });
+        try
+        {
+            string query = $"DELETE FROM ResinNotification WHERE UserId = @userId AND Game = @game";
+            _connection.Execute(query, new { userId, game });
+        }
+        catch { }
+    }
+
+    public IEnumerable<ResinNotification> GetElapsedResinNotifications(DateTime timeNow)
+    {
+        try
+        {
+            string query = $"SELECT * FROM ResinNotification WHERE NotificationTimestamp <= @timeNow";
+            return _connection.Query<ResinNotification>(query, new { timeNow });
+        }
+        catch
+        {
+            return new List<ResinNotification>();
+        }
+    }
+
+    public void DeleteResinNotification(ulong userId, string game, DateTime timeNow)
+    {
+        try
+        {
+            string query = $"DELETE FROM ResinNotification WHERE UserId = @userId AND Game = @game AND NotificationTimestamp <= @timeNow";
+            _connection.Execute(query, new { userId, game, timeNow });
+        }
+        catch { }
     }
 }

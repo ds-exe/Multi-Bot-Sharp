@@ -8,7 +8,7 @@ public class CustomFormatHelper : DefaultHelpFormatter
 
     public CustomFormatHelper(CommandContext ctx) : base(ctx)
     {
-        _ = InitialiseEmbeds(ctx.Client);
+        InitialiseEmbeds(ctx.Client);
     }
 
     public override CommandHelpMessage Build()
@@ -19,9 +19,9 @@ public class CustomFormatHelper : DefaultHelpFormatter
         return base.Build();
     }
 
-    private async Task InitialiseEmbeds(DiscordClient client)
+    private void InitialiseEmbeds(DiscordClient client)
     {
-        User = await client.GetUserAsync(creatorID);
+        User = client.GetUserAsync(creatorID).Result;
         var text = ConfigHelper.GetJsonText("config");
         EmbedThumbnail = JsonSerializer.Deserialize<Config>(text).EmbedThumbnail;
     }

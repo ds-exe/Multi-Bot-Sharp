@@ -56,7 +56,7 @@ public class TimeModule : BaseCommandModule
     [Description("Gets the time for a given timezone")]
     public async Task Now(CommandContext ctx, [Description("Optional timezone, default UTC")] string? timezone = null)
     {
-        var zone = GetTimeZone(timezone, ctx.Member.Id);
+        var zone = GetTimeZone(timezone, ctx.Message.Author.Id);
         if (zone == null)
         {
             await ctx.RespondAsync("Invalid timezone");
@@ -71,7 +71,7 @@ public class TimeModule : BaseCommandModule
     {
         if (timezone == null)
         {
-            var timeZoneInfo = _databaseService.GetTimeZone(ctx.Member.Id);
+            var timeZoneInfo = _databaseService.GetTimeZone(ctx.Message.Author.Id);
             if (timeZoneInfo != null)
             {
                 await ctx.RespondAsync(timeZoneInfo.DisplayName);
@@ -82,10 +82,10 @@ public class TimeModule : BaseCommandModule
             }
             return;
         }
-        var zone = GetTimeZone(timezone, ctx.Member.Id);
+        var zone = GetTimeZone(timezone, ctx.Message.Author.Id);
         if (zone != null)
         {
-            _databaseService.InsertTimeZone(new TimeZoneData { UserId = ctx.Member.Id, TimeZoneId = zone.Id });
+            _databaseService.InsertTimeZone(new TimeZoneData { UserId = ctx.Message.Author.Id, TimeZoneId = zone.Id });
             await ctx.RespondAsync("Time Zone set");
             return;
         }
@@ -94,7 +94,7 @@ public class TimeModule : BaseCommandModule
 
     private async Task SendTimeEmbed(CommandContext ctx, string time, string? date, string? timezone, TimestampFormat format)
     {
-        var zone = GetTimeZone(timezone, ctx.Member.Id);
+        var zone = GetTimeZone(timezone, ctx.Message.Author.Id);
         if (zone == null)
         {
             await ctx.RespondAsync("Invalid timezone");
