@@ -30,7 +30,7 @@ public class ResinModule : BaseCommandModule
     {
         if (!games.ContainsKey(game))
         {
-            await ctx.RespondAsync("Resin error message");
+            await ctx.RespondAsync("Entered game is not supported.");
             return;
         }
 
@@ -65,15 +65,19 @@ public class ResinModule : BaseCommandModule
         }
         else
         {
-            var nextNotification = _databaseService.GetNextResinNotification(resinData);
-
-            var responseMessage = new DiscordMessageBuilder()
-                .AddEmbed(EmbedHelper.GetResinEmbed(resinData, nextNotification, GetCurrentResin(resinData)))
-                .AddComponents(EmbedHelper.GetButtons(120))
-                .AddComponents(EmbedHelper.GetButtons2(120));
-
-            await message.RespondAsync(responseMessage);
+            await message.RespondAsync(GetResinDataMessage(resinData));
         }
+    }
+
+    private DiscordMessageBuilder GetResinDataMessage(ResinData resinData)
+    {
+        var nextNotification = _databaseService.GetNextResinNotification(resinData);
+        var customResin = _databaseService.GetCustomResinData(resinData.UserId, resinData.Game);
+
+        return new DiscordMessageBuilder()
+            .AddEmbed(EmbedHelper.GetResinEmbed(resinData, nextNotification, GetCurrentResin(resinData)))
+            .AddComponents(EmbedHelper.GetButtons(customResin != null ? customResin.Resin : 120))
+            .AddComponents(EmbedHelper.GetButtons2(customResin != null ? customResin.Resin : 120));
     }
 
     private async Task ReduceResinData(DiscordMessage message, ulong userId, string game, int resin)
@@ -108,21 +112,19 @@ public class ResinModule : BaseCommandModule
     {
         _databaseService.ClearOldResinNotifications(userId, resinData.Game);
         var currentResin = GetCurrentResin(resinData);
-        if (currentResin >= games[resinData.Game].MaxResin)
+        if (currentResin < games[resinData.Game].MaxResin)
         {
-            return;
+            SetResinNotification(message, userId, resinData, games[resinData.Game].MaxResin);
         }
-        SetResinNotification(message, userId, resinData, games[resinData.Game].MaxResin);
-        if (currentResin >= games[resinData.Game].MaxResin - 20)
+        if (currentResin < games[resinData.Game].MaxResin - 20)
         {
-            return;
+            SetResinNotification(message, userId, resinData, games[resinData.Game].MaxResin - 20);
         }
-        SetResinNotification(message, userId, resinData, games[resinData.Game].MaxResin - 20);
-        if (currentResin >= 120)
+        var customResin = _databaseService.GetCustomResinData(userId, resinData.Game);
+        if (customResin != null && currentResin < customResin.Resin)
         {
-            return;
+            SetResinNotification(message, userId, resinData, customResin.Resin);
         }
-        SetResinNotification(message, userId, resinData, 120);
     }
 
     private void SetResinNotification(DiscordMessage message, ulong userId, ResinData resinData, int notificationResin)
@@ -159,16 +161,40 @@ public class ResinModule : BaseCommandModule
         return;
     }
 
-    //[Command("notify")]
-    //[Description("Set a custom notification time")]
-    public async Task Notify(CommandContext ctx, int resin = 0)
+    [Command("notify")]
+    [Description("Set a custom notification value")]
+    public async Task Notify(CommandContext ctx, int? resin = null, string game = "hsr")
     {
+        if (!games.ContainsKey(game))
+        {
+            await ctx.RespondAsync("Entered game is not supported.");
+            return;
+        }
+        if (resin == null)
+        {
+            var customResinData = _databaseService.GetCustomResinData(ctx.Message.Author.Id, game);
+            if (customResinData != null)
+            {
+                await ctx.RespondAsync($"Current resin notification: {customResinData.Resin}");
+            }
+            else
+            {
+                await ctx.RespondAsync("No custom resin value set");
+            }
+            return;
+        }
         if (resin < 30)
         {
             await ctx.RespondAsync("Cannot notify at less than 30");
             return;
         }
-        await ctx.RespondAsync("Not implemented");
+        if (resin > games[game].MaxResin)
+        {
+            await ctx.RespondAsync("Cannot notify at less than 30");
+            return;
+        }
+        _databaseService.InsertCustomResinData(new CustomResinData { UserId = ctx.Message.Author.Id, Game = game, Resin = (int)resin });
+        await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
         return;
     }
 
@@ -191,15 +217,7 @@ public class ResinModule : BaseCommandModule
             try
             {
                 var user = await _discordClient.GetUserAsync(resinNotification.UserId);
-
-                var nextNotification = _databaseService.GetNextResinNotification(resinNotification);
-
-                var responseMessage = new DiscordMessageBuilder()
-                    .AddEmbed(EmbedHelper.GetResinEmbed(resinNotification, nextNotification, GetCurrentResin(resinNotification)))
-                    .AddComponents(EmbedHelper.GetButtons(120))
-                    .AddComponents(EmbedHelper.GetButtons2(120));
-
-                await user.SendMessageAsync(responseMessage);
+                await user.SendMessageAsync(GetResinDataMessage(resinNotification));
             }
             catch { }
         }
@@ -214,6 +232,7 @@ public class ResinModule : BaseCommandModule
         game = game.Replace("Genshin", "genshin");
         game = Regex.Replace(game, " |:/ g", "");
 
+        var customResin = _databaseService.GetCustomResinData(e.User.Id, game);
         switch (e.Id)
         {
             case "lowResin":
@@ -226,10 +245,16 @@ public class ResinModule : BaseCommandModule
                 await ReduceResinData(e.Message, e.User.Id, game, 40);
                 break;
             case "customResin":
-                await ReduceResinData(e.Message, e.User.Id, game, 120);
+                if (customResin != null)
+                {
+                    await ReduceResinData(e.Message, e.User.Id, game, customResin.Resin);
+                }
                 break;
             case "customResin2":
-                await ReduceResinData(e.Message, e.User.Id, game, 240);
+                if (customResin != null)
+                {
+                    await ReduceResinData(e.Message, e.User.Id, game, customResin.Resin * 2);
+                }
                 break;
             case "refresh":
                 await SendResinData(e.Message, e.User.Id, game);

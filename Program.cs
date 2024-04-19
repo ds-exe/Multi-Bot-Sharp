@@ -25,11 +25,9 @@
 
             var lavalink = discord.UseLavalink();
 
-            var db = new DatabaseService();
-
             var services = new ServiceCollection()
                 .AddSingleton<QueueService>()
-                .AddSingleton(db)
+                .AddSingleton<DatabaseService>()
                 .AddSingleton(discord)
                 .BuildServiceProvider();
 
@@ -42,7 +40,7 @@
             commands.RegisterCommands(Assembly.GetExecutingAssembly());
             commands.SetHelpFormatter<CustomFormatHelper>();
 
-            await discord.ConnectAsync();
+            await discord.ConnectAsync(new DiscordActivity($"{config.Prefix}help", ActivityType.ListeningTo));
             await Task.Delay(15 * 1000);
 
             await ConfigHelper.ConnectLavalink(lavalink);

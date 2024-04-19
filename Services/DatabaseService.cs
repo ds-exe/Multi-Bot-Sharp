@@ -36,6 +36,7 @@ public class DatabaseService
         InitialiseTable("ResinData(UserId INTEGER, Game TEXT, MaxResinTimestamp INTEGER, PRIMARY KEY(UserId, Game))");
         InitialiseTable("ResinNotification(UserId INTEGER, Game TEXT, NotificationTimestamp INTEGER, " +
             "MaxResinTimestamp INTEGER, PRIMARY KEY(UserId, Game, NotificationTimestamp))");
+        InitialiseTable("CustomResinData(UserId INTEGER, Game TEXT, Resin INTEGER, PRIMARY KEY(UserId, Game))");
     }
 
     public void InitialiseTable(string table)
@@ -157,5 +158,28 @@ public class DatabaseService
             _connection.Execute(query, new { timeNow });
         }
         catch { }
+    }
+
+    public void InsertCustomResinData(CustomResinData customResinData)
+    {
+        try
+        {
+            string query = $"REPLACE INTO CustomResinData (UserId, Game, Resin) VALUES (@UserId, @Game, @Resin)";
+            _connection.Execute(query, customResinData);
+        }
+        catch { }
+    }
+
+    public CustomResinData? GetCustomResinData(ulong userId, string game)
+    {
+        try
+        {
+            var query = "SELECT * FROM CustomResinData WHERE UserId = @userId AND Game = @game";
+            return _connection.Query<CustomResinData>(query, new { userId, game }).FirstOrDefault();
+        }
+        catch
+        {
+            return null;
+        }
     }
 }
