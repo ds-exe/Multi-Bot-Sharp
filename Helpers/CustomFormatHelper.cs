@@ -8,7 +8,9 @@ public class CustomFormatHelper : DefaultHelpFormatter
 
     public CustomFormatHelper(CommandContext ctx) : base(ctx)
     {
-        InitialiseEmbeds(ctx.Client);
+        var config = JsonSerializer.Deserialize<Config>(ConfigHelper.GetJsonText("config"));
+        User = ctx.Client.GetUserAsync(config?.Owner ?? creatorID).Result;
+        EmbedThumbnail = config?.EmbedThumbnail ?? "";
     }
 
     public override CommandHelpMessage Build()
@@ -17,12 +19,5 @@ public class CustomFormatHelper : DefaultHelpFormatter
         EmbedBuilder.WithThumbnail(EmbedThumbnail);
         EmbedBuilder.WithFooter($"BOT owner @{User.Username}", User.AvatarUrl);
         return base.Build();
-    }
-
-    private void InitialiseEmbeds(DiscordClient client)
-    {
-        var config = JsonSerializer.Deserialize<Config>(ConfigHelper.GetJsonText("config"));
-        User = client.GetUserAsync(config?.Owner ?? creatorID).Result;
-        EmbedThumbnail = config?.EmbedThumbnail ?? "";
     }
 }
