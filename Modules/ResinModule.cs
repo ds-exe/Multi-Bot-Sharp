@@ -94,6 +94,10 @@ public class ResinModule : BaseCommandModule
                 await message.RespondAsync($"Not enough resin to reduce");
                 return;
             }
+            if (resinData.MaxResinTimestamp < DateTime.UtcNow)
+            {
+                resinData.MaxResinTimestamp = DateTime.UtcNow;
+            }
             await SetResinData(message, userId, game, resinData.MaxResinTimestamp.AddMinutes(resin * games[game].ResinsMins));
         }
     }
@@ -253,7 +257,7 @@ public class ResinModule : BaseCommandModule
             case "customResin2":
                 if (customResin != null)
                 {
-                    await ReduceResinData(e.Message, e.User.Id, game, customResin.Resin * 2);
+                    await ReduceResinData(e.Message, e.User.Id, game, 240);
                 }
                 break;
             case "refresh":

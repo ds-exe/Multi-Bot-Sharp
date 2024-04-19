@@ -29,7 +29,7 @@ public class EmbedHelper
         return embed.Build();
     }
 
-    public static DiscordComponent[] GetButtons(int resin)
+    public static DiscordComponent[] GetButtons(int customResin)
     {
         return
         [
@@ -39,12 +39,12 @@ public class EmbedHelper
         ];
     }
 
-    public static DiscordComponent[] GetButtons2(int resin)
+    public static DiscordComponent[] GetButtons2(int customResin)
     {
         return
         [
-            new DiscordButtonComponent(ButtonStyle.Secondary, "customResin", $"-{resin}", resin <= 0),
-            new DiscordButtonComponent(ButtonStyle.Secondary, "customResin2", $"-{resin * 2}", resin <= 0),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "customResin", $"-{customResin}", customResin <= 0),
+            new DiscordButtonComponent(ButtonStyle.Secondary, "customResin2", $"-240"),
             new DiscordButtonComponent(ButtonStyle.Primary, "refresh", "↻")
         ];
     }

@@ -2,6 +2,7 @@ services:
   lavalink:
     # pin the image version to Lavalink v4
     image: ghcr.io/lavalink-devs/lavalink:v4-update-lp
+    pull_policy: always
     restart: unless-stopped
     environment:
       # set Java options here
