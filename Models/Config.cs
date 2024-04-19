@@ -11,4 +11,6 @@ public class Config
     public string BotTitle { get; set; }
 
     public string EmbedThumbnail { get; set; }
+
+    public ulong Owner { get; set; }
 }

@@ -15,14 +15,14 @@ public class CustomFormatHelper : DefaultHelpFormatter
     {
         EmbedBuilder.Color = new DiscordColor("0099ff");
         EmbedBuilder.WithThumbnail(EmbedThumbnail);
-        EmbedBuilder.WithFooter($"BOT made by @{User.Username}", User.AvatarUrl);
+        EmbedBuilder.WithFooter($"BOT owner @{User.Username}", User.AvatarUrl);
         return base.Build();
     }
 
     private void InitialiseEmbeds(DiscordClient client)
     {
-        User = client.GetUserAsync(creatorID).Result;
-        var text = ConfigHelper.GetJsonText("config");
-        EmbedThumbnail = JsonSerializer.Deserialize<Config>(text).EmbedThumbnail;
+        var config = JsonSerializer.Deserialize<Config>(ConfigHelper.GetJsonText("config"));
+        User = client.GetUserAsync(config?.Owner ?? creatorID).Result;
+        EmbedThumbnail = config?.EmbedThumbnail ?? "";
     }
 }
