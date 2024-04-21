@@ -28,12 +28,6 @@ public class ResinModule : BaseCommandModule
 
     public async Task Resin(CommandContext ctx, [Description("hsr or genshin")] string game, [Description("positive value to set, negative value to reduce")] int? resin = null)
     {
-        if (!games.ContainsKey(game))
-        {
-            await ctx.RespondAsync("Entered game is not supported.");
-            return;
-        }
-
         if (resin == null)
         {
             await SendResinData(ctx.Message, ctx.Message.Author.Id, game);
@@ -150,7 +144,7 @@ public class ResinModule : BaseCommandModule
     }
 
     [GroupCommand, Command("hsr")]
-    [Description("Shortcut for resin hsr")]
+    [Description("Honkai: Star Rail resin tracker")]
     public async Task Hsr(CommandContext ctx, [Description("positive value to set, negative value to reduce")] int? resin = null)
     {
         await Resin(ctx, "hsr", resin);
@@ -158,7 +152,7 @@ public class ResinModule : BaseCommandModule
     }
 
     [Command("genshin")]
-    [Description("Shortcut for resin genshin")]
+    [Description("Genshin resin tracker")]
     public async Task Genshin(CommandContext ctx, [Description("positive value to set, negative value to reduce")] int? resin = null)
     {
         await Resin(ctx, "genshin", resin);
