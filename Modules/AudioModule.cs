@@ -53,6 +53,24 @@ public class AudioModule : BaseCommandModule
     [Description("Plays music")]
     public async Task Play(CommandContext ctx, [RemainingText] string query)
     {
+        await Play(ctx, query, false);
+    }
+
+    [Command("shuffle")]
+    [Description("Shuffles current queue, can use to initate shuffled playback")]
+    public async Task Shuffle(CommandContext ctx, [RemainingText] string? query)
+    {
+        if (query == null)
+        {
+            await Shuffle(ctx);
+            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
+            return;
+        }
+        await Play(ctx, query, true);
+    }
+
+    private async Task Play(CommandContext ctx, string query, bool shuffle)
+    {
         if (ctx.Channel.IsPrivate)
         {
             await ctx.RespondAsync("Cannot play in DM's.");
@@ -106,7 +124,7 @@ public class AudioModule : BaseCommandModule
         {
             QueueTrack(ctx, queue, loadResult.GetResultAs<LavalinkTrack>());
         }
-        else if(loadResult.LoadType == LavalinkLoadResultType.Playlist)
+        else if (loadResult.LoadType == LavalinkLoadResultType.Playlist)
         {
             QueuePlaylist(ctx, queue, loadResult.GetResultAs<LavalinkPlaylist>(), query);
         }
@@ -119,7 +137,31 @@ public class AudioModule : BaseCommandModule
             throw new InvalidOperationException("Unexpected load result type.");
         }
 
+        if (shuffle)
+        {
+            await Shuffle(ctx);
+        }
         PlayQueueAsync(guildPlayer, queue);
+    }
+
+    private async Task Shuffle(CommandContext ctx)
+    {
+        if (ctx.Channel.IsPrivate)
+        {
+            await ctx.RespondAsync("Cannot play in DM's.");
+            return;
+        }
+        var lavalink = ctx.Client.GetLavalink();
+        var guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
+        if (guildPlayer == null)
+        {
+            await ctx.RespondAsync("Nothing is playing.");
+            return;
+        }
+
+        var queue = _queueService.GetQueue(guildPlayer.ChannelId);
+
+        queue.Shuffle();
     }
 
     [Command("skip")]

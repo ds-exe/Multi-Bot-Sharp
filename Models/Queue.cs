@@ -2,9 +2,10 @@
 
 public class Queue
 {
-    public List<QueueEntry> QueueEntries = new List<QueueEntry>();
+    private Random _rand = new Random();
+    private List<QueueEntry> QueueEntries = new List<QueueEntry>();
 
-    public  QueueEntry? PreviousQueueEntry { get; set; }
+    public QueueEntry? PreviousQueueEntry { get; private set; }
 
     public void AddTrack(DiscordChannel channel, LavalinkTrack track)
     {
@@ -16,5 +17,10 @@ public class Queue
         PreviousQueueEntry = QueueEntries.FirstOrDefault();
         QueueEntries.Remove(PreviousQueueEntry);
         return PreviousQueueEntry;
+    }
+
+    public void Shuffle()
+    {
+        QueueEntries = QueueEntries.OrderBy(_ => _rand.Next()).ToList();
     }
 }
