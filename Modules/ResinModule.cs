@@ -137,7 +137,7 @@ public class ResinModule : BaseCommandModule
 
     private static int GetCurrentResin(ResinData resinData)
     {
-        return (int)Math.Min(Math.Floor(games[resinData.Game].MaxResin -
+        return Math.Min((int)(games[resinData.Game].MaxResin -
             (resinData.MaxResinTimestamp - DateTime.UtcNow).TotalMinutes /
             games[resinData.Game].ResinsMins),
             games[resinData.Game].MaxResin);
