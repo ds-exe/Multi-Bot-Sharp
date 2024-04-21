@@ -101,27 +101,27 @@ public class ResinModule : BaseCommandModule
         var resinData = new ResinData { UserId = userId, Game = game, MaxResinTimestamp = fullTime };
         _databaseService.InsertResinData(resinData);
 
-        SetResinNotifications(message, userId, resinData);
+        SetResinNotifications(message, resinData);
 
         await SendResinData(message, userId, game);
     }
 
-    private void SetResinNotifications(DiscordMessage message, ulong userId, ResinData resinData)
+    private void SetResinNotifications(DiscordMessage message, ResinData resinData)
     {
-        _databaseService.ClearOldResinNotifications(userId, resinData.Game);
+        _databaseService.ClearOldResinNotifications(resinData.UserId, resinData.Game);
         var currentResin = GetCurrentResin(resinData);
         if (currentResin < games[resinData.Game].MaxResin)
         {
-            SetResinNotification(message, userId, resinData, games[resinData.Game].MaxResin);
+            SetResinNotification(message, resinData.UserId, resinData, games[resinData.Game].MaxResin);
         }
         if (currentResin < games[resinData.Game].MaxResin - 20)
         {
-            SetResinNotification(message, userId, resinData, games[resinData.Game].MaxResin - 20);
+            SetResinNotification(message, resinData.UserId, resinData, games[resinData.Game].MaxResin - 20);
         }
-        var customResin = _databaseService.GetCustomResinData(userId, resinData.Game);
+        var customResin = _databaseService.GetCustomResinData(resinData.UserId, resinData.Game);
         if (customResin != null && currentResin < customResin.Resin)
         {
-            SetResinNotification(message, userId, resinData, customResin.Resin);
+            SetResinNotification(message, resinData.UserId, resinData, customResin.Resin);
         }
     }
 
@@ -192,6 +192,11 @@ public class ResinModule : BaseCommandModule
             return;
         }
         _databaseService.InsertCustomResinData(new CustomResinData { UserId = ctx.Message.Author.Id, Game = game, Resin = (int)resin });
+        var resinData = _databaseService.GetResinData(ctx.Message.Author.Id, game);
+        if (resinData != null)
+        {
+            SetResinNotifications(ctx.Message, resinData);
+        }
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
         return;
     }
