@@ -10,9 +10,9 @@ public class ResinModule : BaseCommandModule
         { "genshin", new GameResin{ MaxResin = 160, ResinsMins = 8 } },
     };
 
+    private DiscordClient _discordClient;
     private DatabaseService _databaseService;
-    private static System.Timers.Timer _timer;
-    private static DiscordClient _discordClient;
+    private static System.Timers.Timer? _timer;
 
     public ResinModule(DiscordClient client, DatabaseService databaseService)
     {

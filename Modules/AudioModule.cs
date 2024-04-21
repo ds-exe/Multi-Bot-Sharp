@@ -35,9 +35,9 @@ public class AudioModule : BaseCommandModule
         }
 
         var session = lavalink.ConnectedSessions.Values.First();
-        var channel = ctx.Member.VoiceState.Channel;
+        var channel = ctx.Member.VoiceState?.Channel;
 
-        if (channel.Type != ChannelType.Voice && channel.Type != ChannelType.Stage)
+        if (channel?.Type != ChannelType.Voice && channel?.Type != ChannelType.Stage)
         {
             await ctx.RespondAsync("Not a valid voice channel.");
             return false;
@@ -51,7 +51,7 @@ public class AudioModule : BaseCommandModule
 
     [Command("play")]
     [Description("Plays music")]
-    public async Task Play(CommandContext ctx, [RemainingText] string query)
+    public async Task Play(CommandContext ctx, [RemainingText] string? query)
     {
         await Play(ctx, query, false);
     }
@@ -69,9 +69,9 @@ public class AudioModule : BaseCommandModule
         await Play(ctx, query, true);
     }
 
-    private async Task Play(CommandContext ctx, string query, bool shuffle)
+    private async Task Play(CommandContext ctx, string? query, bool shuffle)
     {
-        if (ctx.Channel.IsPrivate)
+        if (ctx.Channel.IsPrivate || ctx.Guild?.Id == null)
         {
             await ctx.RespondAsync("Cannot play in DM's.");
             return;
@@ -83,9 +83,13 @@ public class AudioModule : BaseCommandModule
             return;
         }
 
-        await ctx.Message.ModifySuppressionAsync(true);
+        try
+        {
+            await ctx.Message.ModifySuppressionAsync(true);
+        }
+        catch { }
 
-        if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
+        if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel?.Id == null)
         {
             await ctx.RespondAsync("You are not in a voice channel.");
             return;
@@ -101,6 +105,10 @@ public class AudioModule : BaseCommandModule
                 return;
             }
             guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
+            if (guildPlayer == null)
+            {
+                return;
+            }
         }
 
         var type = LavalinkSearchType.Youtube;
@@ -141,12 +149,12 @@ public class AudioModule : BaseCommandModule
         {
             await Shuffle(ctx);
         }
-        PlayQueueAsync(guildPlayer, queue);
+        _ = PlayQueueAsync(guildPlayer, queue);
     }
 
     private async Task Shuffle(CommandContext ctx)
     {
-        if (ctx.Channel.IsPrivate)
+        if (ctx.Channel.IsPrivate || ctx.Guild?.Id == null)
         {
             await ctx.RespondAsync("Cannot play in DM's.");
             return;
@@ -168,7 +176,7 @@ public class AudioModule : BaseCommandModule
     [Description("Skips track")]
     public async Task Skip(CommandContext ctx)
     {
-        if (ctx.Channel.IsPrivate)
+        if (ctx.Channel.IsPrivate || ctx.Guild?.Id == null)
         {
             await ctx.RespondAsync("Cannot play in DM's.");
             return;
@@ -189,7 +197,7 @@ public class AudioModule : BaseCommandModule
     [Description("Stops playback")]
     public async Task Stop(CommandContext ctx)
     {
-        if (ctx.Channel.IsPrivate)
+        if (ctx.Channel.IsPrivate || ctx.Guild?.Id == null)
         {
             await ctx.RespondAsync("Cannot play in DM's.");
             return;
@@ -211,7 +219,7 @@ public class AudioModule : BaseCommandModule
     [Description("Leaves channel")]
     public async Task Leave(CommandContext ctx)
     {
-        if (ctx.Channel.IsPrivate)
+        if (ctx.Channel.IsPrivate || ctx.Guild?.Id == null)
         {
             await ctx.RespondAsync("Cannot play in DM's.");
             return;
@@ -232,7 +240,7 @@ public class AudioModule : BaseCommandModule
     [Description("Shows currently playing song")]
     public async Task NowPlaying(CommandContext ctx)
     {
-        if (ctx.Channel.IsPrivate)
+        if (ctx.Channel.IsPrivate || ctx.Guild?.Id == null)
         {
             await ctx.RespondAsync("Cannot play in DM's.");
             return;
@@ -284,7 +292,10 @@ public class AudioModule : BaseCommandModule
         {
             try
             {
-                await queue.PreviousQueueEntry.DiscordMessage.DeleteAsync();
+                if (queue.PreviousQueueEntry.DiscordMessage?.Id != null)
+                {
+                    await queue.PreviousQueueEntry.DiscordMessage.DeleteAsync();
+                }
             }
             catch
             {
@@ -300,7 +311,10 @@ public class AudioModule : BaseCommandModule
             return;
         }
         await player.PlayAsync(next.Track);
-        queue.PreviousQueueEntry.DiscordMessage = await next.Channel.SendMessageAsync(EmbedHelper.GetTrackPlayingEmbed(next.Track.Info));
+        if (queue.PreviousQueueEntry != null)
+        {
+            queue.PreviousQueueEntry.DiscordMessage = await next.Channel.SendMessageAsync(EmbedHelper.GetTrackPlayingEmbed(next.Track.Info));
+        }
     }
 
     public async void Timeout(LavalinkGuildPlayer player)

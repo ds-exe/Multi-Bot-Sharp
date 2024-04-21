@@ -15,6 +15,10 @@ public class Queue
     public QueueEntry? GetNextQueueEntry()
     {
         PreviousQueueEntry = QueueEntries.FirstOrDefault();
+        if (PreviousQueueEntry == null)
+        {
+            return PreviousQueueEntry;
+        }
         QueueEntries.Remove(PreviousQueueEntry);
         return PreviousQueueEntry;
     }

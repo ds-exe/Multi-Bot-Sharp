@@ -4,7 +4,7 @@ public class ResinData
 {
     public ulong UserId { get; set; }
 
-    public string Game { get; set; }
+    public required string Game { get; set; }
 
     public DateTime MaxResinTimestamp { get; set;}
 }

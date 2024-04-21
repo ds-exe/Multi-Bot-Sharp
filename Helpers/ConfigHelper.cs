@@ -47,10 +47,6 @@ public class ConfigHelper
         {
             await lavalink.ConnectAsync(lavalinkConfig);
         }
-        catch
-        {
-            //Console.WriteLine("Lavalink connection error.");
-            //Environment.Exit(1);
-        }
+        catch { }
     }
 }

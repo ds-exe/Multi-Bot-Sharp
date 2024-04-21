@@ -162,7 +162,7 @@ public class TimeModule : BaseCommandModule
 
             return TZConvert.GetTimeZoneInfo(result);
         }
-        catch (TimeZoneNotFoundException e)
+        catch (TimeZoneNotFoundException)
         {
             return null;
         }

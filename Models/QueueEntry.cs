@@ -6,7 +6,7 @@ public class QueueEntry
 
     public LavalinkTrack Track { get; set; }
 
-    public DiscordMessage DiscordMessage { get; set; }
+    public DiscordMessage? DiscordMessage { get; set; }
 
     public QueueEntry(DiscordChannel channel, LavalinkTrack track)
     {

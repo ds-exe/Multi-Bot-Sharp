@@ -4,7 +4,7 @@ public class CustomResinData
 {
     public ulong UserId { get; set; }
 
-    public string Game { get; set; }
+    public required string Game { get; set; }
 
     public int Resin { get; set; }
 }
