@@ -8,6 +8,7 @@ public class TimeModule : BaseCommandModule
     private Dictionary<string, string> _timeZones;
 
     private static readonly string _dateRegex = @"^(\d{2})/(\d{2})/?(\d{4})?$";
+    private static readonly string _timeRegex = @"\d{2}:\d{2}";
 
     public TimeModule(DatabaseService databaseService)
     {
@@ -100,6 +101,12 @@ public class TimeModule : BaseCommandModule
             await ctx.RespondAsync("Invalid timezone");
             return;
         }
+        if (date != null && !IsTime(time) && IsDate(time) && !IsDate(date) && IsTime(date))
+        {
+            var tmpDate = date;
+            date = time;
+            time = tmpDate;
+        }
 
         date = ParseDate(date, zone);
         if (date == null)
@@ -122,6 +129,11 @@ public class TimeModule : BaseCommandModule
     private bool IsDate(string date)
     {
         return Regex.Match(date, _dateRegex).Success;
+    }
+
+    private bool IsTime(string time)
+    {
+        return Regex.Match(time, _timeRegex).Success;
     }
 
     private string? ParseDate(string? date, TimeZoneInfo zone)
@@ -174,10 +186,5 @@ public class TimeModule : BaseCommandModule
         {
             return null;
         }
-    }
-
-    public static string GenerateUnixTimeNow()
-    {
-        return $"{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
     }
 }
