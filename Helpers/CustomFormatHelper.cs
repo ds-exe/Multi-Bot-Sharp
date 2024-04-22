@@ -9,7 +9,8 @@ public class CustomFormatHelper : DefaultHelpFormatter
     public CustomFormatHelper(CommandContext ctx) : base(ctx)
     {
         var config = JsonSerializer.Deserialize<Config>(ConfigHelper.GetJsonText("config"));
-        User = ctx.Client.GetUserAsync(config?.Owner ?? creatorID).Result;
+        var botOwner = config?.Owner == 0 ? creatorID : config?.Owner;
+        User = ctx.Client.GetUserAsync(botOwner ?? creatorID).Result;
         EmbedThumbnail = config?.EmbedThumbnail ?? "";
     }
 
