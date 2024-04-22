@@ -137,7 +137,7 @@ public class TimeModule : BaseCommandModule
             return null;
         }
         var year = matches.Groups[3].Value;
-        return $"{matches.Groups[1].Value}/{matches.Groups[2].Value}/{(year != string.Empty ? year : baseDate.Year)}"; ;
+        return $"{matches.Groups[1].Value}/{matches.Groups[2].Value}/{(year != string.Empty ? year : baseDate.Year)}";
     }
 
     private TimeZoneInfo? GetTimeZone(string? timezone, ulong uid)
@@ -154,9 +154,17 @@ public class TimeModule : BaseCommandModule
                 return TZConvert.GetTimeZoneInfo("utc");
             }
 
-            var success = _timeZones.TryGetValue(timezone, out var result);
+            var success = _timeZones.TryGetValue(timezone.ToLower(), out var result);
             if (!success || result == null)
             {
+                var matches = Regex.Match(timezone.ToLower(), @"^utc(\+|-)([0-9]{1,2})$");
+                if (matches.Success)
+                {
+                    var sign = int.Parse(matches.Groups[2].Value) > 0 ? "-" : "+";
+                    var value = Math.Abs(int.Parse(matches.Groups[2].Value));
+                    return TZConvert.GetTimeZoneInfo($"Etc/GMT{sign}{value}");
+                }
+
                 return TZConvert.GetTimeZoneInfo(timezone);
             }
 
