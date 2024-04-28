@@ -1,26 +1,17 @@
 ﻿namespace Multi_Bot_Sharp.Modules;
 
-[Group("music")]
-[Description("Music commands")]
-public class AudioModule : BaseCommandModule
+public class AudioBaseModule : BaseCommandModule
 {
-    private const int timeoutMinutes = 15;
+    protected const int timeoutMinutes = 15;
 
-    private QueueService _queueService;
+    protected QueueService _queueService;
 
-    public AudioModule(QueueService queueService)
+    public AudioBaseModule(QueueService queueService)
     {
         _queueService = queueService;
     }
 
-    [GroupCommand, Command("help")]
-    [Description("Lists music commands")]
-    public async Task Help(CommandContext ctx)
-    {
-        await ctx.RespondAsync(EmbedHelper.GetCustomHelpCommandEmbed(ctx));
-    }
-
-    private async Task<bool> JoinAsync(CommandContext ctx)
+    protected async Task<bool> JoinAsync(CommandContext ctx)
     {
         var lavalink = ctx.Client.GetLavalink();
         if(!lavalink.ConnectedSessions.Any())
@@ -49,27 +40,7 @@ public class AudioModule : BaseCommandModule
         return true;
     }
 
-    [Command("play")]
-    [Description("Plays music")]
-    public async Task Play(CommandContext ctx, [RemainingText] string? query)
-    {
-        await Play(ctx, query, false);
-    }
-
-    [Command("shuffle")]
-    [Description("Shuffles current queue, can use to initate shuffled playback")]
-    public async Task Shuffle(CommandContext ctx, [RemainingText] string? query)
-    {
-        if (query == null)
-        {
-            await Shuffle(ctx);
-            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
-            return;
-        }
-        await Play(ctx, query, true);
-    }
-
-    private async Task Play(CommandContext ctx, string? query, bool shuffle)
+    protected async Task Play(CommandContext ctx, string? query, bool shuffle)
     {
         if (ctx.Channel.IsPrivate || ctx.Guild?.Id == null)
         {
@@ -152,7 +123,7 @@ public class AudioModule : BaseCommandModule
         _ = PlayQueueAsync(guildPlayer, queue);
     }
 
-    private async Task Shuffle(CommandContext ctx)
+    protected async Task Shuffle(CommandContext ctx)
     {
         if (ctx.Channel.IsPrivate || ctx.Guild?.Id == null)
         {
@@ -170,6 +141,118 @@ public class AudioModule : BaseCommandModule
         var queue = _queueService.GetQueue(guildPlayer.ChannelId);
 
         queue.Shuffle();
+    }
+
+    protected void QueueTrack(CommandContext ctx, Queue queue, LavalinkTrack track)
+    {
+        ctx.Channel.SendMessageAsync(EmbedHelper.GetTrackAddedEmbed(track.Info, ctx.User));
+        queue.AddTrack(ctx.Channel, track);
+    }
+
+    protected void QueuePlaylist(CommandContext ctx, Queue queue, LavalinkPlaylist playlist, string url)
+    {
+        ctx.Channel.SendMessageAsync(EmbedHelper.GetPlaylistAddedEmbed(playlist, ctx.User, url));
+        foreach (var track in playlist.Tracks)
+        {
+            queue.AddTrack(ctx.Channel, track);
+        }
+    }
+
+    protected async Task Player_TrackEnded(LavalinkGuildPlayer sender, DisCatSharp.Lavalink.EventArgs.LavalinkTrackEndedEventArgs e)
+    {
+        await PlayQueueAsync(sender, _queueService.GetQueue(sender.ChannelId));
+    }
+
+    protected async Task PlayQueueAsync(LavalinkGuildPlayer player, Queue queue)
+    {
+        if (queue == null)
+        {
+            return;
+        }
+
+        if (player.CurrentTrack != null)
+        {
+            return;
+        }
+
+        if (queue.PreviousQueueEntry != null)
+        {
+            try
+            {
+                if (queue.PreviousQueueEntry.DiscordMessage?.Id != null)
+                {
+                    await queue.PreviousQueueEntry.DiscordMessage.DeleteAsync();
+                }
+            }
+            catch
+            {
+                return;
+            }
+        }
+
+        var next = queue.GetNextQueueEntry();
+        if (next == null)
+        {
+            _queueService.SetLastPlayed(player.ChannelId);
+            Timeout(player);
+            return;
+        }
+        await player.PlayAsync(next.Track);
+        if (queue.PreviousQueueEntry != null)
+        {
+            queue.PreviousQueueEntry.DiscordMessage = await next.Channel.SendMessageAsync(EmbedHelper.GetTrackPlayingEmbed(next.Track.Info));
+        }
+    }
+
+    protected async void Timeout(LavalinkGuildPlayer player)
+    {
+        await Task.Delay(timeoutMinutes * 60 * 1000);
+        if (_queueService.GetLastPlayed(player.ChannelId) <= DateTime.UtcNow.AddMinutes(-timeoutMinutes))
+        {
+            if (player.CurrentTrack == null)
+            {
+                _queueService.RemoveLastPlayed(player.ChannelId);
+                _queueService.RemoveQueue(player.ChannelId);
+                await player.DisconnectAsync();
+            }
+        }
+    }
+}
+
+[Group("music")]
+[Description("Music commands")]
+public class AudioModule : AudioBaseModule
+{
+    public AudioModule(QueueService queueService) : base(queueService)
+    {
+
+    }
+
+    [GroupCommand, Command("help")]
+    [Description("Lists music commands")]
+    public async Task Help(CommandContext ctx)
+    {
+        await ctx.RespondAsync(EmbedHelper.GetCustomHelpCommandEmbed(ctx));
+    }
+
+    [Command("play")]
+    [Description("Plays music")]
+    public async Task Play(CommandContext ctx, [RemainingText] string? query)
+    {
+        await Play(ctx, query, false);
+    }
+
+    [Command("shuffle")]
+    [Description("Shuffles current queue, can use to initate shuffled playback")]
+    public async Task Shuffle(CommandContext ctx, [RemainingText] string? query)
+    {
+        if (query == null)
+        {
+            await Shuffle(ctx);
+            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
+            return;
+        }
+        await Play(ctx, query, true);
     }
 
     [Command("skip")]
@@ -255,79 +338,21 @@ public class AudioModule : BaseCommandModule
 
         await ctx.Channel.SendMessageAsync(EmbedHelper.GetNowPlayingEmbed(guildPlayer.CurrentTrack.Info, ctx.User));
     }
+}
 
-    private void QueueTrack(CommandContext ctx, Queue queue, LavalinkTrack track)
+[Hidden]
+public class AudioShorthandModule : AudioBaseModule
+{
+    public AudioShorthandModule(QueueService queueService) : base(queueService)
     {
-        ctx.Channel.SendMessageAsync(EmbedHelper.GetTrackAddedEmbed(track.Info, ctx.User));
-        queue.AddTrack(ctx.Channel, track);
+
     }
 
-    private void QueuePlaylist(CommandContext ctx, Queue queue, LavalinkPlaylist playlist, string url)
+    [Command("play")]
+    [Description("Plays music")]
+    [Hidden]
+    public async Task Play(CommandContext ctx, [RemainingText] string? query)
     {
-        ctx.Channel.SendMessageAsync(EmbedHelper.GetPlaylistAddedEmbed(playlist, ctx.User, url));
-        foreach (var track in playlist.Tracks)
-        {
-            queue.AddTrack(ctx.Channel, track);
-        }
-    }
-
-    private async Task Player_TrackEnded(LavalinkGuildPlayer sender, DisCatSharp.Lavalink.EventArgs.LavalinkTrackEndedEventArgs e)
-    {
-        await PlayQueueAsync(sender, _queueService.GetQueue(sender.ChannelId));
-    }
-
-    public async Task PlayQueueAsync(LavalinkGuildPlayer player, Queue queue)
-    {
-        if (queue == null)
-        {
-            return;
-        }
-
-        if (player.CurrentTrack != null)
-        {
-            return;
-        }
-
-        if (queue.PreviousQueueEntry != null)
-        {
-            try
-            {
-                if (queue.PreviousQueueEntry.DiscordMessage?.Id != null)
-                {
-                    await queue.PreviousQueueEntry.DiscordMessage.DeleteAsync();
-                }
-            }
-            catch
-            {
-                return;
-            }
-        }
-
-        var next = queue.GetNextQueueEntry();
-        if (next == null)
-        {
-            _queueService.SetLastPlayed(player.ChannelId);
-            Timeout(player);
-            return;
-        }
-        await player.PlayAsync(next.Track);
-        if (queue.PreviousQueueEntry != null)
-        {
-            queue.PreviousQueueEntry.DiscordMessage = await next.Channel.SendMessageAsync(EmbedHelper.GetTrackPlayingEmbed(next.Track.Info));
-        }
-    }
-
-    public async void Timeout(LavalinkGuildPlayer player)
-    {
-        await Task.Delay(timeoutMinutes * 60 * 1000);
-        if (_queueService.GetLastPlayed(player.ChannelId) <= DateTime.UtcNow.AddMinutes(-timeoutMinutes))
-        {
-            if (player.CurrentTrack == null)
-            {
-                _queueService.RemoveLastPlayed(player.ChannelId);
-                _queueService.RemoveQueue(player.ChannelId);
-                await player.DisconnectAsync();
-            }
-        }
+        await Play(ctx, query, false);
     }
 }
