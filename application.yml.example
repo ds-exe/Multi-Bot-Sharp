@@ -2,6 +2,9 @@ server: # REST and WS server
   port: 2333
   address: lavalink
 plugins:
+  youtube:
+    enabled: true
+    clients: ["MUSIC", "ANDROID", "WEB"]
   lavasrc:
     providers: # Custom providers for track loading. This is the default
       # - "dzisrc:%ISRC%" # Deezer ISRC provider
@@ -16,7 +19,7 @@ plugins:
       deezer: false # Enable Deezer source
       yandexmusic: false # Enable Yandex Music source
       flowerytts: false # Enable Flowery TTS source
-      youtube: true # Enable YouTube search source (https://github.com/topi314/LavaSearch)
+      youtube: false # Enable YouTube search source (https://github.com/topi314/LavaSearch)
     spotify:
       clientId: ""
       clientSecret: ""
@@ -25,10 +28,12 @@ plugins:
       albumLoadLimit: 6 # The number of pages at 50 tracks each
 lavalink:
   plugins:
+    - dependency: "com.github.lavalink-devs.lavaplayer-youtube-source:plugin:1.0.5"
+      repository: "https://jitpack.io"
     - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.0.1"
   server:
     sources:
-      youtube: true
+      youtube: false
       bandcamp: true
       soundcloud: true
       twitch: true
