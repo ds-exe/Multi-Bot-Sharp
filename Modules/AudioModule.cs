@@ -1,10 +1,10 @@
 ﻿namespace Multi_Bot_Sharp.Modules;
 
-public class AudioBaseModule : BaseCommandModule
+public class BaseAudioModule : BaseCommandModule
 {
     protected QueueService _queueService;
 
-    public AudioBaseModule(QueueService queueService)
+    public BaseAudioModule(QueueService queueService)
     {
         _queueService = queueService;
     }
@@ -250,7 +250,7 @@ public class AudioBaseModule : BaseCommandModule
 
 [Group("music")]
 [Description("Music commands")]
-public class AudioModule : AudioBaseModule
+public class AudioModule : BaseAudioModule
 {
     public AudioModule(QueueService queueService) : base(queueService) { }
 
@@ -305,7 +305,7 @@ public class AudioModule : AudioBaseModule
 }
 
 [Hidden]
-public class AudioShorthandModule : AudioBaseModule
+public class AudioShorthandModule : BaseAudioModule
 {
     public AudioShorthandModule(QueueService queueService) : base(queueService) { }
 

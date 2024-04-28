@@ -1,8 +1,6 @@
 ﻿namespace Multi_Bot_Sharp.Modules;
 
-[Group("resin"), Aliases("hsr")]
-[Description("Resin commands")]
-public class ResinModule : BaseCommandModule
+public class BaseResinModule : BaseCommandModule
 {
     private static readonly Dictionary<string, GameResin> games = new Dictionary<string, GameResin>()
     {
@@ -14,7 +12,7 @@ public class ResinModule : BaseCommandModule
     private DatabaseService _databaseService;
     private static System.Timers.Timer? _timer;
 
-    public ResinModule(DiscordClient client, DatabaseService databaseService)
+    public BaseResinModule(DiscordClient client, DatabaseService databaseService)
     {
         _databaseService = databaseService;
         _discordClient = client;
@@ -143,24 +141,18 @@ public class ResinModule : BaseCommandModule
             games[resinData.Game].MaxResin);
     }
 
-    [GroupCommand, Command("hsr")]
-    [Description("Honkai: Star Rail resin tracker")]
     public async Task Hsr(CommandContext ctx, [Description("positive value to set, negative value to reduce")] int? resin = null)
     {
         await Resin(ctx, "hsr", resin);
         return;
     }
 
-    [Command("genshin")]
-    [Description("Genshin resin tracker")]
     public async Task Genshin(CommandContext ctx, [Description("positive value to set, negative value to reduce")] int? resin = null)
     {
         await Resin(ctx, "genshin", resin);
         return;
     }
 
-    [Command("notify")]
-    [Description("Set a custom notification value")]
     public async Task Notify(CommandContext ctx, int? resin = null, string game = "hsr")
     {
         if (!games.ContainsKey(game))
@@ -263,5 +255,60 @@ public class ResinModule : BaseCommandModule
                 await SendResinData(e.Message, e.User.Id, game);
                 break;
         }
+    }
+}
+
+[Group("resin")]
+[Description("Resin commands")]
+public class ResinModule : BaseResinModule
+{
+    public ResinModule(DiscordClient client, DatabaseService databaseService) : base(client, databaseService) { }
+
+    [Command("hsr")]
+    [Description("Honkai: Star Rail resin tracker")]
+    public new async Task Hsr(CommandContext ctx, [Description("positive value to set, negative value to reduce")] int? resin = null)
+    {
+        await base.Hsr(ctx, resin);
+    }
+
+    [Command("genshin")]
+    [Description("Genshin resin tracker")]
+    public new async Task Genshin(CommandContext ctx, [Description("positive value to set, negative value to reduce")] int? resin = null)
+    {
+        await base.Genshin(ctx, resin);
+    }
+
+    [Command("notify")]
+    [Description("Set a custom notification value")]
+    public new async Task Notify(CommandContext ctx, int? resin = null, string game = "hsr")
+    {
+        await base.Notify(ctx, resin, game);
+    }
+}
+
+[Hidden]
+public class ResinShorthandModule : BaseResinModule
+{
+    public ResinShorthandModule(DiscordClient client, DatabaseService databaseService) : base(client, databaseService) { }
+
+    [Command("hsr")]
+    [Description("Honkai: Star Rail resin tracker")]
+    public new async Task Hsr(CommandContext ctx, [Description("positive value to set, negative value to reduce")] int? resin = null)
+    {
+        await base.Hsr(ctx, resin);
+    }
+
+    [Command("genshin")]
+    [Description("Genshin resin tracker")]
+    public new async Task Genshin(CommandContext ctx, [Description("positive value to set, negative value to reduce")] int? resin = null)
+    {
+        await base.Genshin(ctx, resin);
+    }
+
+    [Command("notify")]
+    [Description("Set a custom notification value")]
+    public new async Task Notify(CommandContext ctx, int? resin = null, string game = "hsr")
+    {
+        await base.Notify(ctx, resin, game);
     }
 }
