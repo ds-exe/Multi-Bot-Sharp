@@ -259,8 +259,6 @@ public class ResinModule : BaseResinModule
 {
     public ResinModule(DiscordClient client, DatabaseService databaseService) : base(client, databaseService)
     {
-        _discordClient = client;
-
         client.ComponentInteractionCreated += async (s, e) =>
         {
             await HandleButtons(e);
