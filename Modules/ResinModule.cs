@@ -8,7 +8,7 @@ public class BaseResinModule : BaseCommandModule
         { "genshin", new GameResin{ MaxResin = 160, ResinsMins = 8 } },
     };
 
-    private DiscordClient _discordClient;
+    protected DiscordClient _discordClient;
     private DatabaseService _databaseService;
     private static System.Timers.Timer? _timer;
 
@@ -16,11 +16,6 @@ public class BaseResinModule : BaseCommandModule
     {
         _databaseService = databaseService;
         _discordClient = client;
-
-        client.ComponentInteractionCreated += async (s, e) =>
-        {
-            await HandleButtons(e);
-        };
         StartNotificationTimer();
     }
 
@@ -218,7 +213,7 @@ public class BaseResinModule : BaseCommandModule
         }
     }
 
-    async Task HandleButtons(ComponentInteractionCreateEventArgs e)
+    protected async Task HandleButtons(ComponentInteractionCreateEventArgs e)
     {
         await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 
@@ -262,7 +257,15 @@ public class BaseResinModule : BaseCommandModule
 [Description("Resin commands")]
 public class ResinModule : BaseResinModule
 {
-    public ResinModule(DiscordClient client, DatabaseService databaseService) : base(client, databaseService) { }
+    public ResinModule(DiscordClient client, DatabaseService databaseService) : base(client, databaseService)
+    {
+        _discordClient = client;
+
+        client.ComponentInteractionCreated += async (s, e) =>
+        {
+            await HandleButtons(e);
+        };
+    }
 
     [Command("hsr")]
     [Description("Honkai: Star Rail resin tracker")]
