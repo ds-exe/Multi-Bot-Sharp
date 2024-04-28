@@ -154,33 +154,12 @@ public class AudioBaseModule : BaseCommandModule
             queue.AddTrack(ctx.Channel, track);
         }
     }
-}
 
-[Group("music")]
-[Description("Music commands")]
-public class AudioModule : AudioBaseModule
-{
-    public AudioModule(QueueService queueService) : base(queueService)
-    {
-
-    }
-
-    [GroupCommand, Command("help")]
-    [Description("Lists music commands")]
-    public async Task Help(CommandContext ctx)
-    {
-        await ctx.RespondAsync(EmbedHelper.GetCustomHelpCommandEmbed(ctx));
-    }
-
-    [Command("play")]
-    [Description("Plays music")]
     public async Task Play(CommandContext ctx, [RemainingText] string? query)
     {
         await Play(ctx, query, false);
     }
 
-    [Command("shuffle")]
-    [Description("Shuffles current queue, can use to initate shuffled playback")]
     public async Task Shuffle(CommandContext ctx, [RemainingText] string? query)
     {
         if (query == null)
@@ -192,8 +171,6 @@ public class AudioModule : AudioBaseModule
         await Play(ctx, query, true);
     }
 
-    [Command("skip")]
-    [Description("Skips track")]
     public async Task Skip(CommandContext ctx)
     {
         if (ctx.Channel.IsPrivate || ctx.Guild?.Id == null)
@@ -213,8 +190,6 @@ public class AudioModule : AudioBaseModule
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
     }
 
-    [Command("stop")]
-    [Description("Stops playback")]
     public async Task Stop(CommandContext ctx)
     {
         if (ctx.Channel.IsPrivate || ctx.Guild?.Id == null)
@@ -235,8 +210,6 @@ public class AudioModule : AudioBaseModule
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
     }
 
-    [Command("leave")]
-    [Description("Leaves channel")]
     public async Task Leave(CommandContext ctx)
     {
         if (ctx.Channel.IsPrivate || ctx.Guild?.Id == null)
@@ -256,8 +229,6 @@ public class AudioModule : AudioBaseModule
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
     }
 
-    [Command("nowplaying")]
-    [Description("Shows currently playing song")]
     public async Task NowPlaying(CommandContext ctx)
     {
         if (ctx.Channel.IsPrivate || ctx.Guild?.Id == null)
@@ -277,19 +248,106 @@ public class AudioModule : AudioBaseModule
     }
 }
 
-[Hidden]
-public class AudioShorthandModule : AudioBaseModule
+[Group("music")]
+[Description("Music commands")]
+public class AudioModule : AudioBaseModule
 {
-    public AudioShorthandModule(QueueService queueService) : base(queueService)
-    {
+    public AudioModule(QueueService queueService) : base(queueService) { }
 
+    [GroupCommand, Command("help")]
+    [Description("Lists music commands")]
+    public async Task Help(CommandContext ctx)
+    {
+        await ctx.RespondAsync(EmbedHelper.GetCustomHelpCommandEmbed(ctx));
     }
 
     [Command("play")]
     [Description("Plays music")]
-    [Hidden]
-    public async Task Play(CommandContext ctx, [RemainingText] string? query)
+    public new async Task Play(CommandContext ctx, [RemainingText] string? query)
     {
-        await Play(ctx, query, false);
+        await base.Play(ctx, query);
+    }
+
+    [Command("shuffle")]
+    [Description("Shuffles current queue, can use to initate shuffled playback")]
+    public new async Task Shuffle(CommandContext ctx, [RemainingText] string? query)
+    {
+        await base.Shuffle(ctx, query);
+    }
+
+    [Command("skip")]
+    [Description("Skips track")]
+    public new async Task Skip(CommandContext ctx)
+    {
+        await base.Skip(ctx);
+    }
+
+    [Command("stop")]
+    [Description("Stops playback")]
+    public new async Task Stop(CommandContext ctx)
+    {
+        await base.Stop(ctx);
+    }
+
+    [Command("leave")]
+    [Description("Leaves channel")]
+    public new async Task Leave(CommandContext ctx)
+    {
+        await base.Leave(ctx);
+    }
+
+    [Command("nowplaying")]
+    [Description("Shows currently playing song")]
+    public new async Task NowPlaying(CommandContext ctx)
+    {
+        await base.NowPlaying(ctx);
+    }
+}
+
+[Hidden]
+public class AudioShorthandModule : AudioBaseModule
+{
+    public AudioShorthandModule(QueueService queueService) : base(queueService) { }
+
+    [Command("play")]
+    [Description("Plays music")]
+    public new async Task Play(CommandContext ctx, [RemainingText] string? query)
+    {
+        await base.Play(ctx, query);
+    }
+
+    [Command("shuffle")]
+    [Description("Shuffles current queue, can use to initate shuffled playback")]
+    public new async Task Shuffle(CommandContext ctx, [RemainingText] string? query)
+    {
+        await base.Shuffle(ctx, query);
+    }
+
+    [Command("skip")]
+    [Description("Skips track")]
+    public new async Task Skip(CommandContext ctx)
+    {
+        await base.Skip(ctx);
+    }
+
+    [Command("stop")]
+    [Description("Stops playback")]
+    public new async Task Stop(CommandContext ctx)
+    {
+        await base.Stop(ctx);
+    }
+
+    [Command("leave")]
+    [Description("Leaves channel")]
+    public new async Task Leave(CommandContext ctx)
+    {
+        await base.Leave(ctx);
+    }
+
+    [Command("nowplaying")]
+    [Description("Shows currently playing song")]
+    public new async Task NowPlaying(CommandContext ctx)
+    {
+        await base.NowPlaying(ctx);
     }
 }

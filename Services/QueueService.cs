@@ -31,11 +31,6 @@ public class QueueService
         return queue;
     }
 
-    public bool QueueExists(Queue queue)
-    {
-        return players.ContainsValue(queue);
-    }
-
     public void RemoveQueue(ulong queueId)
     {
         players.Remove(queueId);
