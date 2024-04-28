@@ -44,36 +44,25 @@ public class Queue
 
     public async Task PlayQueueAsync()
     {
-        if (!_queueService.QueueExists(this))
-        {
-            return;
-        }
-
         if (_player.CurrentTrack != null)
         {
             return;
         }
 
-        if (PreviousQueueEntry != null)
+        try
         {
-            try
+            if (PreviousQueueEntry?.DiscordMessage?.Id != null)
             {
-                if (PreviousQueueEntry.DiscordMessage?.Id != null)
-                {
-                    await PreviousQueueEntry.DiscordMessage.DeleteAsync();
-                }
-            }
-            catch
-            {
-                return;
+                await PreviousQueueEntry.DiscordMessage.DeleteAsync();
             }
         }
+        catch { }
 
         var next = GetNextQueueEntry();
         if (next == null)
         {
             _queueService.SetLastPlayed(_player.ChannelId);
-            Timeout(_player);
+            StartTimeout();
             return;
         }
         await _player.PlayAsync(next.Track);
@@ -83,16 +72,16 @@ public class Queue
         }
     }
 
-    protected async void Timeout(LavalinkGuildPlayer player)
+    protected async void StartTimeout()
     {
         await Task.Delay(timeoutMinutes * 60 * 1000);
-        if (_queueService.GetLastPlayed(player.ChannelId) <= DateTime.UtcNow.AddMinutes(-timeoutMinutes))
+        if (_queueService.GetLastPlayed(_player.ChannelId) <= DateTime.UtcNow.AddMinutes(-timeoutMinutes))
         {
-            if (player.CurrentTrack == null)
+            if (_player.CurrentTrack == null)
             {
-                _queueService.RemoveLastPlayed(player.ChannelId);
-                _queueService.RemoveQueue(player.ChannelId);
-                await player.DisconnectAsync();
+                _queueService.RemoveLastPlayed(_player.ChannelId);
+                _queueService.RemoveQueue(_player.ChannelId);
+                await _player.DisconnectAsync();
             }
         }
     }
