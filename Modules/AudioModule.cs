@@ -2,8 +2,6 @@
 
 public class AudioBaseModule : BaseCommandModule
 {
-    protected const int timeoutMinutes = 15;
-
     protected QueueService _queueService;
 
     public AudioBaseModule(QueueService queueService)
@@ -34,9 +32,8 @@ public class AudioBaseModule : BaseCommandModule
             return false;
         }
 
-        var player = await session.ConnectAsync(channel);
+        await session.ConnectAsync(channel);
 
-        player.TrackEnded += Player_TrackEnded;
         return true;
     }
 
@@ -97,7 +94,7 @@ public class AudioBaseModule : BaseCommandModule
             return;
         }
 
-        var queue = _queueService.GetQueue(guildPlayer.ChannelId);
+        var queue = _queueService.GetQueue(guildPlayer.ChannelId, guildPlayer);
 
         if (loadResult.LoadType == LavalinkLoadResultType.Track)
         {
@@ -120,7 +117,7 @@ public class AudioBaseModule : BaseCommandModule
         {
             await Shuffle(ctx);
         }
-        _ = PlayQueueAsync(guildPlayer, queue);
+        _ = queue.PlayQueueAsync();
     }
 
     protected async Task Shuffle(CommandContext ctx)
@@ -138,7 +135,7 @@ public class AudioBaseModule : BaseCommandModule
             return;
         }
 
-        var queue = _queueService.GetQueue(guildPlayer.ChannelId);
+        var queue = _queueService.GetQueue(guildPlayer.ChannelId, guildPlayer);
 
         queue.Shuffle();
     }
@@ -155,66 +152,6 @@ public class AudioBaseModule : BaseCommandModule
         foreach (var track in playlist.Tracks)
         {
             queue.AddTrack(ctx.Channel, track);
-        }
-    }
-
-    protected async Task Player_TrackEnded(LavalinkGuildPlayer sender, DisCatSharp.Lavalink.EventArgs.LavalinkTrackEndedEventArgs e)
-    {
-        await PlayQueueAsync(sender, _queueService.GetQueue(sender.ChannelId));
-    }
-
-    protected async Task PlayQueueAsync(LavalinkGuildPlayer player, Queue queue)
-    {
-        if (queue == null)
-        {
-            return;
-        }
-
-        if (player.CurrentTrack != null)
-        {
-            return;
-        }
-
-        if (queue.PreviousQueueEntry != null)
-        {
-            try
-            {
-                if (queue.PreviousQueueEntry.DiscordMessage?.Id != null)
-                {
-                    await queue.PreviousQueueEntry.DiscordMessage.DeleteAsync();
-                }
-            }
-            catch
-            {
-                return;
-            }
-        }
-
-        var next = queue.GetNextQueueEntry();
-        if (next == null)
-        {
-            _queueService.SetLastPlayed(player.ChannelId);
-            Timeout(player);
-            return;
-        }
-        await player.PlayAsync(next.Track);
-        if (queue.PreviousQueueEntry != null)
-        {
-            queue.PreviousQueueEntry.DiscordMessage = await next.Channel.SendMessageAsync(EmbedHelper.GetTrackPlayingEmbed(next.Track.Info));
-        }
-    }
-
-    protected async void Timeout(LavalinkGuildPlayer player)
-    {
-        await Task.Delay(timeoutMinutes * 60 * 1000);
-        if (_queueService.GetLastPlayed(player.ChannelId) <= DateTime.UtcNow.AddMinutes(-timeoutMinutes))
-        {
-            if (player.CurrentTrack == null)
-            {
-                _queueService.RemoveLastPlayed(player.ChannelId);
-                _queueService.RemoveQueue(player.ChannelId);
-                await player.DisconnectAsync();
-            }
         }
     }
 }

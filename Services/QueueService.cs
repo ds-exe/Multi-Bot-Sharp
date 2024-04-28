@@ -18,7 +18,7 @@ public class QueueService
         return null;
     }
 
-    public Queue GetQueue(ulong queueId)
+    public Queue GetQueue(ulong queueId, LavalinkGuildPlayer player)
     {
         var queue = GetQueueInternal(queueId);
         if (queue != null)
@@ -26,9 +26,14 @@ public class QueueService
             return queue;
         }
 
-        queue = new Queue();
+        queue = new Queue(this, player);
         players.TryAdd(queueId, queue);
         return queue;
+    }
+
+    public bool QueueExists(Queue queue)
+    {
+        return players.ContainsValue(queue);
     }
 
     public void RemoveQueue(ulong queueId)
