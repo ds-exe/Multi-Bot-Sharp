@@ -20,7 +20,8 @@
             {
                 Token = config.Token,
                 TokenType = TokenType.Bot,
-                Intents = DiscordIntents.AllUnprivileged | DiscordIntents.MessageContent
+                Intents = DiscordIntents.AllUnprivileged | DiscordIntents.MessageContent,
+                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.None
             });
 
             var lavalink = discord.UseLavalink();
