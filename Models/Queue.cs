@@ -16,9 +16,9 @@ public class Queue
         player.TrackEnded += Player_TrackEnded;
     }
 
-    public void AddTrack(DiscordChannel channel, LavalinkTrack track)
+    public void AddTrack(CommandContext ctx, LavalinkTrack track)
     {
-        QueueEntries.Add(new QueueEntry(channel, track));
+        QueueEntries.Add(new QueueEntry(ctx.Channel, ctx.Message.Author, track));
     }
 
     protected QueueEntry? GetNextQueueEntry()
@@ -30,6 +30,11 @@ public class Queue
         }
         QueueEntries.Remove(PreviousQueueEntry);
         return PreviousQueueEntry;
+    }
+
+    public DiscordUser? GetCurrentTrackUser()
+    {
+        return PreviousQueueEntry?.User;
     }
 
     public void Shuffle()
@@ -51,9 +56,9 @@ public class Queue
 
         try
         {
-            if (PreviousQueueEntry?.DiscordMessage?.Id != null)
+            if (PreviousQueueEntry?.PlayingMessage?.Id != null)
             {
-                await PreviousQueueEntry.DiscordMessage.DeleteAsync();
+                await PreviousQueueEntry.PlayingMessage.DeleteAsync();
             }
         }
         catch { }
@@ -68,7 +73,7 @@ public class Queue
         await _player.PlayAsync(next.Track);
         if (PreviousQueueEntry != null)
         {
-            PreviousQueueEntry.DiscordMessage = await next.Channel.SendMessageAsync(EmbedHelper.GetTrackPlayingEmbed(next.Track.Info));
+            PreviousQueueEntry.PlayingMessage = await next.Channel.SendMessageAsync(EmbedHelper.GetTrackPlayingEmbed(next.Track.Info));
         }
     }
 

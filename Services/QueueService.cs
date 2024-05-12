@@ -18,7 +18,12 @@ public class QueueService
         return null;
     }
 
-    public Queue GetQueue(ulong queueId, LavalinkGuildPlayer player)
+    public Queue? GetQueue(ulong queueId)
+    {
+        return GetQueueInternal(queueId);
+    }
+
+    public Queue AddQueue(ulong queueId, LavalinkGuildPlayer player)
     {
         var queue = GetQueueInternal(queueId);
         if (queue != null)

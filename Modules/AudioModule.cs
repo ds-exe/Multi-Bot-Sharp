@@ -94,7 +94,7 @@ public class BaseAudioModule : BaseCommandModule
             return;
         }
 
-        var queue = _queueService.GetQueue(guildPlayer.ChannelId, guildPlayer);
+        var queue = _queueService.AddQueue(guildPlayer.ChannelId, guildPlayer);
 
         if (loadResult.LoadType == LavalinkLoadResultType.Track)
         {
@@ -135,15 +135,15 @@ public class BaseAudioModule : BaseCommandModule
             return;
         }
 
-        var queue = _queueService.GetQueue(guildPlayer.ChannelId, guildPlayer);
+        var queue = _queueService.GetQueue(guildPlayer.ChannelId);
 
-        queue.Shuffle();
+        queue?.Shuffle();
     }
 
     protected void QueueTrack(CommandContext ctx, Queue queue, LavalinkTrack track)
     {
         ctx.Channel.SendMessageAsync(EmbedHelper.GetTrackAddedEmbed(track.Info, ctx.User));
-        queue.AddTrack(ctx.Channel, track);
+        queue.AddTrack(ctx, track);
     }
 
     protected void QueuePlaylist(CommandContext ctx, Queue queue, LavalinkPlaylist playlist, string url)
@@ -151,7 +151,7 @@ public class BaseAudioModule : BaseCommandModule
         ctx.Channel.SendMessageAsync(EmbedHelper.GetPlaylistAddedEmbed(playlist, ctx.User, url));
         foreach (var track in playlist.Tracks)
         {
-            queue.AddTrack(ctx.Channel, track);
+            queue.AddTrack(ctx, track);
         }
     }
 
@@ -243,8 +243,14 @@ public class BaseAudioModule : BaseCommandModule
             await ctx.RespondAsync("Nothing is playing.");
             return;
         }
+        var user = _queueService.GetQueue(guildPlayer.ChannelId)?.GetCurrentTrackUser();
+        if (user == null)
+        {
+            await ctx.RespondAsync("Nothing is playing.");
+            return;
+        }
 
-        await ctx.Channel.SendMessageAsync(EmbedHelper.GetNowPlayingEmbed(guildPlayer.CurrentTrack.Info, ctx.User));
+        await ctx.Channel.SendMessageAsync(EmbedHelper.GetNowPlayingEmbed(guildPlayer.CurrentTrack.Info, user));
     }
 }
 
