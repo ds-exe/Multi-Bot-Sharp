@@ -4,7 +4,7 @@ server: # REST and WS server
 plugins:
   youtube:
     enabled: true
-    clients: ["MUSIC", "ANDROID", "WEB"]
+    clients: ["MUSIC", "ANDROID", "WEB", "TVHTML5EMBEDDED"]
   lavasrc:
     providers: # Custom providers for track loading. This is the default
       # - "dzisrc:%ISRC%" # Deezer ISRC provider
