@@ -63,10 +63,12 @@ public class Queue
         }
         catch { }
 
+        await Task.Delay(1000);
         var next = GetNextQueueEntry();
         if (next == null)
         {
             _queueService.SetLastPlayed(_player.ChannelId);
+            await Task.Delay(1000);
             StartTimeout();
             return;
         }
