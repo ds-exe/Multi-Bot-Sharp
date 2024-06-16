@@ -225,6 +225,7 @@ public class BaseAudioModule : BaseCommandModule
             return;
         }
 
+        _queueService.RemoveQueue(guildPlayer.ChannelId);
         await guildPlayer.DisconnectAsync();
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
     }
