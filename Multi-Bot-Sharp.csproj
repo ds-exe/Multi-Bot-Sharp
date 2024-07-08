@@ -14,9 +14,9 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.35" />
-    <PackageReference Include="DisCatSharp" Version="10.6.5-nightly-001" />
-    <PackageReference Include="DisCatSharp.CommandsNext" Version="10.6.5-nightly-001" />
-    <PackageReference Include="DisCatSharp.Lavalink" Version="10.6.5-nightly-001" />
+    <PackageReference Include="DisCatSharp" Version="10.6.5-nightly-002" />
+    <PackageReference Include="DisCatSharp.CommandsNext" Version="10.6.5-nightly-002" />
+    <PackageReference Include="DisCatSharp.Lavalink" Version="10.6.5-nightly-002" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.4" />
     <PackageReference Include="TimeZoneConverter" Version="6.1.0" />
   </ItemGroup>
