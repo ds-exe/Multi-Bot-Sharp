@@ -43,7 +43,7 @@ public class QueueService
 
     public void SetLastPlayed(ulong queueId)
     {
-        playersLastPlayed.TryAdd(queueId, DateTime.UtcNow);
+        playersLastPlayed[queueId] = DateTime.UtcNow;
     }
 
     public DateTime GetLastPlayed(ulong queueId)
