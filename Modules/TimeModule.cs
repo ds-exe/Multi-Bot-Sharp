@@ -13,15 +13,14 @@ public class TimeModule : BaseCommandModule
     public TimeModule(DatabaseService databaseService)
     {
         _databaseService = databaseService;
-        var text = ConfigHelper.GetJsonText("timezones");
-        _timeZones = JsonSerializer.Deserialize<Dictionary<string, string>>(text) ?? new();
+        _timeZones = ConfigHelper.GetJsonObject<Dictionary<string, string>>("timezones") ?? new();
     }
 
     [Command("time")]
     [Description("Get an embed for a given time/date, optional timezone")]
     public async Task Time(CommandContext ctx, [Description("time - hh:mm")] string time, [Description("optional - region/city or abbreviation")] string? timezone = null)
     {
-        if (timezone != null && IsDate(timezone))
+        if (timezone != null && (IsDate(timezone) || IsTime(timezone)))
         {
             await SendTimeEmbed(ctx, time, timezone, null, TimestampFormat.LongDateTime);
             return;

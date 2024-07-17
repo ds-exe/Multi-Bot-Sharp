@@ -9,8 +9,7 @@
 
         static async Task MainAsync()
         {
-            var text = ConfigHelper.GetJsonText("config");
-            var config = JsonSerializer.Deserialize<Config>(text);
+            var config = ConfigHelper.GetJsonObject<Config>("config");
             if (config == null || config.Token == null || config.LavalinkPassword == null || config.Prefix == null)
             {
                 return;

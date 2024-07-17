@@ -2,7 +2,7 @@
 
 public class ConfigHelper
 {
-    public static string GetJsonText(string file)
+    public static T? GetJsonObject<T>(string file)
     {
         string cwd = Directory.GetCurrentDirectory();
         string path = cwd + $"/{file}.json";
@@ -11,12 +11,13 @@ public class ConfigHelper
         path = cwd + $"/../../../{file}.json";
         #endif
 
-        return File.ReadAllText(path);
+        string txt = File.ReadAllText(path);
+        return JsonSerializer.Deserialize<T>(txt);
     }
 
     public async static Task ConnectLavalink(LavalinkExtension lavalink)
     {
-        var config = JsonSerializer.Deserialize<Config>(GetJsonText("config"));
+        var config = GetJsonObject<Config>("config");
         if (config?.LavalinkPassword == null)
         {
             return;

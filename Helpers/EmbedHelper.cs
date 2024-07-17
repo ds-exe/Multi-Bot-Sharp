@@ -2,13 +2,14 @@
 
 public class EmbedHelper
 {
-    private static string GetGameName(string game)
-    {
-        var _resinMap = new Dictionary<string, string>()
+    private static readonly Dictionary<string, string> _resinMap = new Dictionary<string, string>()
         {
             { "hsr", "Honkai: Star Rail "},
             { "genshin", "Genshin" }
         };
+
+    private static string GetGameName(string game)
+    {
         return _resinMap[game];
     }
 
