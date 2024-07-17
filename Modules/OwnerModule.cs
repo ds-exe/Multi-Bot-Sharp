@@ -17,6 +17,11 @@ public class OwnerModule : BaseCommandModule
     {
         if (ctx.User.Id == owner)
         {
+            try
+            {
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
+            }
+            catch { }
             Environment.Exit(0);
         }
     }
