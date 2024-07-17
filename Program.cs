@@ -10,7 +10,7 @@
         static async Task MainAsync()
         {
             var config = ConfigHelper.GetJsonObject<Config>("config");
-            if (config == null || config.Token == null || config.LavalinkPassword == null || config.Prefix == null)
+            if (config.Token == null || config.LavalinkPassword == null || config.Prefix == null)
             {
                 return;
             };

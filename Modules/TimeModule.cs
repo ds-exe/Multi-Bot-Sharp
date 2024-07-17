@@ -13,7 +13,7 @@ public class TimeModule : BaseCommandModule
     public TimeModule(DatabaseService databaseService)
     {
         _databaseService = databaseService;
-        _timeZones = ConfigHelper.GetJsonObject<Dictionary<string, string>>("timezones") ?? new();
+        _timeZones = ConfigHelper.GetJsonObject<Dictionary<string, string>>("timezones");
     }
 
     [Command("time")]

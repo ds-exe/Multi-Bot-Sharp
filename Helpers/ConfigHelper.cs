@@ -2,7 +2,7 @@
 
 public class ConfigHelper
 {
-    public static T? GetJsonObject<T>(string file)
+    public static T GetJsonObject<T>(string file)
     {
         string cwd = Directory.GetCurrentDirectory();
         string path = cwd + $"/{file}.json";
@@ -12,13 +12,18 @@ public class ConfigHelper
         #endif
 
         string txt = File.ReadAllText(path);
-        return JsonSerializer.Deserialize<T>(txt);
+        T? result = JsonSerializer.Deserialize<T>(txt);
+        if (result == null )
+        {
+            throw new Exception($"Error loading file {file}.json");
+        }
+        return result;
     }
 
     public async static Task ConnectLavalink(LavalinkExtension lavalink)
     {
         var config = GetJsonObject<Config>("config");
-        if (config?.LavalinkPassword == null)
+        if (config.LavalinkPassword == null)
         {
             return;
         };

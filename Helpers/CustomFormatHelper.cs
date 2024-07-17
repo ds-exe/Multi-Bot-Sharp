@@ -9,9 +9,9 @@ public class CustomFormatHelper : DefaultHelpFormatter
     public CustomFormatHelper(CommandContext ctx) : base(ctx)
     {
         var config = ConfigHelper.GetJsonObject<Config>("config");
-        var botOwner = config?.Owner == 0 ? creatorID : config?.Owner;
-        User = ctx.Client.GetUserAsync(botOwner ?? creatorID).Result;
-        EmbedThumbnail = config?.EmbedThumbnail ?? "";
+        var botOwner = config.Owner == 0 ? creatorID : config.Owner;
+        User = ctx.Client.GetUserAsync(botOwner).Result;
+        EmbedThumbnail = config.EmbedThumbnail ?? "";
     }
 
     public override CommandHelpMessage Build()
