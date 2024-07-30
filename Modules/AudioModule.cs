@@ -205,7 +205,7 @@ public class BaseAudioModule : BaseCommandModule
             return;
         }
 
-        _queueService.RemoveQueue(guildPlayer.ChannelId);
+        _queueService.ClearQueue(guildPlayer.ChannelId);
         await guildPlayer.StopAsync();
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
     }
@@ -225,6 +225,7 @@ public class BaseAudioModule : BaseCommandModule
             return;
         }
 
+        _queueService.ClearQueue(guildPlayer.ChannelId);
         _queueService.RemoveQueue(guildPlayer.ChannelId);
         await guildPlayer.DisconnectAsync();
         await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));

@@ -4,7 +4,7 @@ public class Queue
 {
     protected const int timeoutMinutes = 15;
     private Random _rand = new Random();
-    private List<QueueEntry> QueueEntries = new List<QueueEntry>();
+    private List<QueueEntry> QueueEntries = new();
     private QueueEntry? PreviousQueueEntry = null;
     private QueueService _queueService;
     private LavalinkGuildPlayer _player;
@@ -19,6 +19,11 @@ public class Queue
     public void AddTrack(CommandContext ctx, LavalinkTrack track)
     {
         QueueEntries.Add(new QueueEntry(ctx.Channel, ctx.Message.Author, track));
+    }
+
+    public void ClearQueue()
+    {
+        QueueEntries = new();
     }
 
     protected QueueEntry? GetNextQueueEntry()
@@ -86,6 +91,7 @@ public class Queue
         {
             if (_player.CurrentTrack == null)
             {
+                _player.TrackEnded -= Player_TrackEnded;
                 _queueService.RemoveLastPlayed(_player.ChannelId);
                 _queueService.RemoveQueue(_player.ChannelId);
                 await _player.DisconnectAsync();

@@ -32,8 +32,17 @@ public class QueueService
         }
 
         queue = new Queue(this, player);
-        players.TryAdd(queueId, queue);
+        players[queueId] = queue;
         return queue;
+    }
+
+    public void ClearQueue(ulong queueId)
+    {
+        var queue = GetQueue(queueId);
+        if (queue != null)
+        {
+            queue.ClearQueue();
+        }
     }
 
     public void RemoveQueue(ulong queueId)
