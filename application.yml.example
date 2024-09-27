@@ -4,7 +4,17 @@ server: # REST and WS server
 plugins:
   youtube:
     enabled: true
-    clients: ["MUSIC", "ANDROID_TESTSUITE", "WEB", "TVHTML5EMBEDDED"]
+    clients:
+      - MUSIC
+      - TVHTML5EMBEDDED
+      - ANDROID_MUSIC
+      - ANDROID_TESTSUITE
+      - WEB
+      - WEBEMBEDDED
+      - ANDROID
+      - ANDROID_LITE
+      - MEDIA_CONNECT
+      - IOS
   lavasrc:
     providers: # Custom providers for track loading. This is the default
       # - "dzisrc:%ISRC%" # Deezer ISRC provider
@@ -28,7 +38,7 @@ plugins:
       albumLoadLimit: 6 # The number of pages at 50 tracks each
 lavalink:
   plugins:
-    - dependency: "dev.lavalink.youtube:youtube-plugin:1.7.1"
+    - dependency: "dev.lavalink.youtube:youtube-plugin:1.8.3"
     - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.2.0"
   server:
     sources:

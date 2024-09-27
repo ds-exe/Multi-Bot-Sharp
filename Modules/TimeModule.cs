@@ -171,7 +171,7 @@ public class TimeModule : BaseCommandModule
                 var matches = Regex.Match(timezone.ToLower(), @"^utc(\+|-)([0-9]{1,2})$");
                 if (matches.Success)
                 {
-                    var sign = int.Parse(matches.Groups[2].Value) > 0 ? "-" : "+";
+                    var sign = int.Parse(matches.Groups[2].Value) > 0 ? "-" : "+"; // Inverted due to Etc/GMT using reversed offsets
                     var value = Math.Abs(int.Parse(matches.Groups[2].Value));
                     return TZConvert.GetTimeZoneInfo($"Etc/GMT{sign}{value}");
                 }
