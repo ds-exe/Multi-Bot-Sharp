@@ -1,7 +1,7 @@
 services:
   lavalink:
     # pin the image version to Lavalink v4
-    image: ghcr.io/lavalink-devs/lavalink:v4-update-lp
+    image: ghcr.io/lavalink-devs/lavalink:4
     pull_policy: always
     restart: unless-stopped
     environment:
