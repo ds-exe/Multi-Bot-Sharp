@@ -4,5 +4,6 @@
   "Prefix": "",
   "BotTitle": "",
   "EmbedThumbnail": "",
+  "ReconnectIndefinitely": false,
   "Owner": 74968333413257216
 }

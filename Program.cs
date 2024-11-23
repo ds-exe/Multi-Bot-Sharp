@@ -20,7 +20,8 @@
                 Token = config.Token,
                 TokenType = TokenType.Bot,
                 Intents = DiscordIntents.AllUnprivileged | DiscordIntents.MessageContent,
-                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.None
+                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.None,
+                ReconnectIndefinitely = config.ReconnectIndefinitely
             });
 
             var lavalink = discord.UseLavalink();

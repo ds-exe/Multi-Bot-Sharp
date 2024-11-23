@@ -12,5 +12,7 @@ public class Config
 
     public string? EmbedThumbnail { get; set; }
 
+    public bool ReconnectIndefinitely { get; set; } = true;
+
     public ulong Owner { get; set; }
 }
