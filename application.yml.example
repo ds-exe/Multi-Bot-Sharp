@@ -7,7 +7,7 @@ plugins:
     clients:
       - MUSIC
       - ANDROID_MUSIC
-      - ANDROID_TESTSUITE
+      - ANDROID_VR
       - WEB
       - WEBEMBEDDED
       - ANDROID
@@ -36,8 +36,8 @@ plugins:
       albumLoadLimit: 6 # The number of pages at 50 tracks each
 lavalink:
   plugins:
-    - dependency: "dev.lavalink.youtube:youtube-plugin:1.8.3"
-    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.2.0"
+    - dependency: "dev.lavalink.youtube:youtube-plugin:1.11.1"
+    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.3.0"
   server:
     sources:
       youtube: false
