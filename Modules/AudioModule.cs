@@ -63,9 +63,16 @@ public class BaseAudioModule : BaseCommandModule
             return;
         }
 
+        var perms = ctx.Member.VoiceState?.Channel?.PermissionsFor(await ctx.Client.CurrentUser.ConvertToMember(ctx.Guild)) ?? Permissions.None;
+        var hasPerms = perms.HasPermission(Permissions.UseVoice) && perms.HasPermission(Permissions.Speak) && perms.HasPermission(Permissions.AccessChannels);
+        if (!hasPerms)
+        {
+            await ctx.Channel.SendMessageAsync("Missing required permissions.");
+            return;
+        }
+
         var lavalink = ctx.Client.GetLavalink();
         var guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
-
         if (guildPlayer == null)
         {
             if (!JoinAsync(ctx).Result)

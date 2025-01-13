@@ -10,17 +10,33 @@ public class BaseResinModule : BaseCommandModule
 
     protected DiscordClient _discordClient;
     private DatabaseService _databaseService;
+    private static bool _initialized = false;
     private static System.Timers.Timer? _timer;
+    private static bool _resinModuleDisabled = true;
 
     public BaseResinModule(DiscordClient client, DatabaseService databaseService)
     {
         _databaseService = databaseService;
         _discordClient = client;
-        StartNotificationTimer();
+        if (!_initialized)
+        {
+            _initialized = true;
+            var config = ConfigHelper.GetJsonObject<Config>("config");
+            if (config.EnableResinModule)
+            {
+                _resinModuleDisabled = false;
+                StartNotificationTimer();
+            }
+        }
     }
 
     public async Task Resin(CommandContext ctx, [Description("hsr or genshin")] string game, [Description("positive value to set, negative value to reduce")] int? resin = null)
     {
+        if (_resinModuleDisabled)
+        {
+            return;
+        }
+
         if (resin == null)
         {
             await SendResinData(ctx.Message, ctx.Message.Author.Id, game);
@@ -101,6 +117,11 @@ public class BaseResinModule : BaseCommandModule
 
     private void SetResinNotifications(DiscordMessage message, ResinData resinData)
     {
+        if (_resinModuleDisabled)
+        {
+            return;
+        }
+
         _databaseService.ClearOldResinNotifications(resinData.UserId, resinData.Game);
         var currentResin = GetCurrentResin(resinData);
         if (currentResin < games[resinData.Game].MaxResin)
@@ -150,6 +171,11 @@ public class BaseResinModule : BaseCommandModule
 
     public async Task Notify(CommandContext ctx, int? resin = null, string game = "hsr")
     {
+        if (_resinModuleDisabled)
+        {
+            return;
+        }
+
         if (!games.ContainsKey(game))
         {
             await ctx.RespondAsync("Entered game is not supported.");
@@ -215,6 +241,11 @@ public class BaseResinModule : BaseCommandModule
 
     protected async Task HandleButtons(ComponentInteractionCreateEventArgs e)
     {
+        if (_resinModuleDisabled)
+        {
+            return;
+        }
+
         await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 
         var game = e.Message.Embeds.First().Title;

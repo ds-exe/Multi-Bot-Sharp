@@ -11,6 +11,7 @@ plugins:
       - WEB
       - WEBEMBEDDED
       - ANDROID
+      - ANDROID_LITE
       - MEDIA_CONNECT
       - IOS
   lavasrc:

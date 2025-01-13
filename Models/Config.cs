@@ -14,5 +14,7 @@ public class Config
 
     public bool ReconnectIndefinitely { get; set; } = true;
 
+    public bool EnableResinModule { get; set; }
+
     public ulong Owner { get; set; }
 }
