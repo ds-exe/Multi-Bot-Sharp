@@ -17,4 +17,6 @@ public class Config
     public bool EnableResinModule { get; set; }
 
     public ulong Owner { get; set; }
+
+    public ulong[]? TestServer { get; set; }
 }

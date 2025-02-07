@@ -1,4 +1,7 @@
 ﻿global using DisCatSharp;
+global using DisCatSharp.ApplicationCommands;
+global using DisCatSharp.ApplicationCommands.Attributes;
+global using DisCatSharp.ApplicationCommands.Context;
 global using DisCatSharp.CommandsNext;
 global using DisCatSharp.CommandsNext.Attributes;
 global using DisCatSharp.CommandsNext.Converters;
@@ -11,6 +14,7 @@ global using DisCatSharp.Lavalink.Entities;
 global using DisCatSharp.Lavalink.Enums;
 global using DisCatSharp.Net;
 global using Microsoft.Extensions.DependencyInjection;
+global using Multi_Bot_Sharp.Commands;
 global using Multi_Bot_Sharp.Helpers;
 global using Multi_Bot_Sharp.Models;
 global using Multi_Bot_Sharp.Services;

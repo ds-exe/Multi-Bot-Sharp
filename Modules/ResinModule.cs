@@ -1,5 +1,8 @@
-﻿namespace Multi_Bot_Sharp.Modules;
+﻿using DisCatSharp.Attributes;
 
+namespace Multi_Bot_Sharp.Modules;
+
+[Deprecated]
 public class BaseResinModule : BaseCommandModule
 {
     private static readonly Dictionary<string, GameResin> games = new Dictionary<string, GameResin>()
