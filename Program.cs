@@ -54,7 +54,7 @@
             {
                 foreach (var server in config.TestServer)
                 {
-                    //appCommands.RegisterGuildCommands<ApplicationCommandsModule>(server); // Used to wipe commands after testing
+                    //await appCommands.CleanGuildCommandsAsync(); // Used to wipe commands after testing
                     appCommands.RegisterGuildCommands(Assembly.GetExecutingAssembly(), server);
                 }
             }
