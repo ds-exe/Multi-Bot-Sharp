@@ -14,6 +14,7 @@ global using DisCatSharp.Lavalink.Entities;
 global using DisCatSharp.Lavalink.Enums;
 global using DisCatSharp.Net;
 global using Microsoft.Extensions.DependencyInjection;
+global using Multi_Bot_Sharp.Commands;
 global using Multi_Bot_Sharp.Helpers;
 global using Multi_Bot_Sharp.Models;
 global using Multi_Bot_Sharp.Services;

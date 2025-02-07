@@ -32,30 +32,52 @@
                 .AddSingleton(discord)
                 .BuildServiceProvider();
 
+            // TODO: Remove remaining CommandsNext module
+            //-------------------------------------------------------------------------
             var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
             {
                 StringPrefixes = new List<string> { config.Prefix },
-                ServiceProvider = services
+                ServiceProvider = services,
+                EnableDefaultHelp = false
             });
+
+            commands.RegisterCommands(Assembly.GetExecutingAssembly());
+            //-------------------------------------------------------------------------
 
             var appCommands = discord.UseApplicationCommands(new ApplicationCommandsConfiguration()
             {
                 ServiceProvider = services,
+                EnableDefaultHelp = false,
             });
 
             if (config.TestServer != null)
             {
-                appCommands.RegisterGuildCommands(Assembly.GetExecutingAssembly(), (ulong)config.TestServer);
+                foreach (var server in config.TestServer)
+                {
+                    appCommands.RegisterGuildCommands(Assembly.GetExecutingAssembly(), server);
+                }
             }
             else
             {
                 appCommands.RegisterGlobalCommands(Assembly.GetExecutingAssembly());
             }
 
-            commands.RegisterCommands(Assembly.GetExecutingAssembly());
-            commands.SetHelpFormatter<CustomFormatHelper>();
+            discord.MessageCreated += async (s, e) =>
+            {
+                if (e.Message.Content == $"{config.Prefix}restart")
+                {
+                    await OwnerCommandModule.Restart(e.Message);
+                }
+                else
+                {
+                    if (e.Message.Content.StartsWith(config.Prefix))
+                    {
+                        await e.Message.RespondAsync("Please use slash commands.");
+                    }
+                }
+            };
 
-            await discord.ConnectAsync(new DiscordActivity($"{config.Prefix}help", ActivityType.ListeningTo));
+            await discord.ConnectAsync(new DiscordActivity($"/help", ActivityType.ListeningTo));
             await Task.Delay(15 * 1000);
 
             await ConfigHelper.ConnectLavalink(lavalink);
