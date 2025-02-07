@@ -18,11 +18,19 @@ public class TimeCommandModule : ApplicationCommandsModule
     [SlashCommand("time", "Gets the given time embed.")]
     public async Task TimeCommand(InteractionContext ctx, [Option("time", "Selected Time")] string time, [Option("date", "Selected Date")] string? date = null, [Option("timezone", "Selected Timezone")] string? timezone = null)
     {
-        if (!IsTime(time) || (date != null && !IsDate(date)))
+        if (!IsTime(time))
         {
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
             {
-                Content = $"Invalid time or date format"
+                Content = $"Invalid time format"
+            });
+        }
+
+        if (date != null && !IsDate(date))
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+            {
+                Content = $"Invalid date format"
             });
         }
 
@@ -32,11 +40,19 @@ public class TimeCommandModule : ApplicationCommandsModule
     [SlashCommand("until", "Gets the given time embed.")]
     public async Task UntilCommand(InteractionContext ctx, [Option("time", "Selected Time")] string time, [Option("date", "Selected Date")] string? date = null, [Option("timezone", "Selected Timezone")] string? timezone = null)
     {
-        if (!IsTime(time) || (date != null && !IsDate(date)))
+        if (!IsTime(time))
         {
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
             {
-                Content = $"Invalid time or date format"
+                Content = $"Invalid time format"
+            });
+        }
+
+        if (date != null && !IsDate(date))
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+            {
+                Content = $"Invalid date format"
             });
         }
 
@@ -111,12 +127,6 @@ public class TimeCommandModule : ApplicationCommandsModule
                 Content = $"Invalid timezone"
             });
             return;
-        }
-        if (date != null && !IsTime(time) && IsDate(time) && !IsDate(date) && IsTime(date))
-        {
-            var tmpDate = date;
-            date = time;
-            time = tmpDate;
         }
 
         date = ParseDate(date, zone);
