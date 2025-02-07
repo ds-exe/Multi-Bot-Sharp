@@ -22,7 +22,8 @@ public class TimeCommandModule : ApplicationCommandsModule
         {
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
             {
-                Content = $"Invalid time format"
+                Content = $"Invalid time format",
+                IsEphemeral = true ,
             });
         }
 
@@ -30,7 +31,8 @@ public class TimeCommandModule : ApplicationCommandsModule
         {
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
             {
-                Content = $"Invalid date format"
+                Content = $"Invalid date format",
+                IsEphemeral = true,
             });
         }
 
@@ -44,7 +46,8 @@ public class TimeCommandModule : ApplicationCommandsModule
         {
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
             {
-                Content = $"Invalid time format"
+                Content = $"Invalid time format",
+                IsEphemeral = true,
             });
         }
 
@@ -52,7 +55,8 @@ public class TimeCommandModule : ApplicationCommandsModule
         {
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
             {
-                Content = $"Invalid date format"
+                Content = $"Invalid date format",
+                IsEphemeral = true,
             });
         }
 
@@ -67,7 +71,8 @@ public class TimeCommandModule : ApplicationCommandsModule
         {
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
             {
-                Content = $"Invalid timezone"
+                Content = $"Invalid timezone",
+                IsEphemeral = true,
             });
             return;
         }
@@ -89,14 +94,16 @@ public class TimeCommandModule : ApplicationCommandsModule
             {
                 await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
                 {
-                    Content = timeZoneInfo.DisplayName
+                    Content = timeZoneInfo.DisplayName,
+                    IsEphemeral = true,
                 });
             }
             else
             {
                 await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
                 {
-                    Content = "No Time Zone data set"
+                    Content = "No Time Zone data set",
+                    IsEphemeral = true,
                 });
             }
             return;
@@ -107,13 +114,15 @@ public class TimeCommandModule : ApplicationCommandsModule
             _databaseService.InsertTimeZone(new TimeZoneData { UserId = ctx.User.Id, TimeZoneId = zone.Id });
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
             {
-                Content = "Time Zone set"
+                Content = "Time Zone set",
+                IsEphemeral = true,
             });
             return;
         }
         await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
         {
-            Content = "Invalid Time Zone"
+            Content = "Invalid Time Zone",
+            IsEphemeral = true,
         });
     }
 
@@ -124,7 +133,8 @@ public class TimeCommandModule : ApplicationCommandsModule
         {
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
             {
-                Content = $"Invalid timezone"
+                Content = $"Invalid timezone",
+                IsEphemeral = true,
             });
             return;
         }
@@ -134,7 +144,8 @@ public class TimeCommandModule : ApplicationCommandsModule
         {
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
             {
-                Content = $"Invalid date"
+                Content = $"Invalid date",
+                IsEphemeral = true,
             });
             return;
         }
@@ -144,7 +155,8 @@ public class TimeCommandModule : ApplicationCommandsModule
         {
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
             {
-                Content = $"Invalid time"
+                Content = $"Invalid time",
+                IsEphemeral = true,
             });
             return;
         }

@@ -40,7 +40,7 @@
 
             var appCommands = discord.UseApplicationCommands(new ApplicationCommandsConfiguration()
             {
-                ServiceProvider = services
+                ServiceProvider = services,
             });
 
             appCommands.RegisterGuildCommands(Assembly.GetExecutingAssembly(), 945317275374870588);
