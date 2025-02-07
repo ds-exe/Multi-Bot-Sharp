@@ -43,7 +43,14 @@
                 ServiceProvider = services,
             });
 
-            appCommands.RegisterGuildCommands(Assembly.GetExecutingAssembly(), 945317275374870588);
+            if (config.TestServer != null)
+            {
+                appCommands.RegisterGuildCommands(Assembly.GetExecutingAssembly(), (ulong)config.TestServer);
+            }
+            else
+            {
+                appCommands.RegisterGlobalCommands(Assembly.GetExecutingAssembly());
+            }
 
             commands.RegisterCommands(Assembly.GetExecutingAssembly());
             commands.SetHelpFormatter<CustomFormatHelper>();
