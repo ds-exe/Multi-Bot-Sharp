@@ -16,9 +16,9 @@ public class Queue
         player.TrackEnded += Player_TrackEnded;
     }
 
-    public void AddTrack(CommandContext ctx, LavalinkTrack track)
+    public void AddTrack(DiscordChannel channel, DiscordUser user, LavalinkTrack track)
     {
-        QueueEntries.Add(new QueueEntry(ctx.Channel, ctx.Message.Author, track));
+        QueueEntries.Add(new QueueEntry(channel, user, track));
     }
 
     public void ClearQueue()

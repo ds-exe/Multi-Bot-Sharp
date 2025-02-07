@@ -150,7 +150,7 @@ public class BaseAudioModule : BaseCommandModule
     protected void QueueTrack(CommandContext ctx, Queue queue, LavalinkTrack track)
     {
         ctx.Channel.SendMessageAsync(EmbedHelper.GetTrackAddedEmbed(track.Info, ctx.User));
-        queue.AddTrack(ctx, track);
+        queue.AddTrack(ctx.Channel, ctx.Message.Author, track);
     }
 
     protected void QueuePlaylist(CommandContext ctx, Queue queue, LavalinkPlaylist playlist, string url)
@@ -158,7 +158,7 @@ public class BaseAudioModule : BaseCommandModule
         ctx.Channel.SendMessageAsync(EmbedHelper.GetPlaylistAddedEmbed(playlist, ctx.User, url));
         foreach (var track in playlist.Tracks)
         {
-            queue.AddTrack(ctx, track);
+            queue.AddTrack(ctx.Channel, ctx.Message.Author, track);
         }
     }
 

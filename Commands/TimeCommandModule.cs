@@ -16,7 +16,7 @@ public class TimeCommandModule : ApplicationCommandsModule
     }
 
     [SlashCommand("time", "Gets the given time embed.")]
-    public async Task TimeCommand(InteractionContext ctx, [Option("time", "Selected Time")] string time, [Option("date", "Selected Date")] string? date = null, [Option("timezone", "Selected Timezone")] string? timezone = null)
+    public async Task TimeCommand(InteractionContext ctx, [Option("time", "Selected Time"), MinimumLength(5), MaximumLength(5)] string time, [Option("date", "Selected Date"), MinimumLength(5), MaximumLength(10)] string? date = null, [Option("timezone", "Selected Timezone")] string? timezone = null)
     {
         if (!IsTime(time))
         {
@@ -40,7 +40,7 @@ public class TimeCommandModule : ApplicationCommandsModule
     }
 
     [SlashCommand("until", "Gets the given time embed.")]
-    public async Task UntilCommand(InteractionContext ctx, [Option("time", "Selected Time")] string time, [Option("date", "Selected Date")] string? date = null, [Option("timezone", "Selected Timezone")] string? timezone = null)
+    public async Task UntilCommand(InteractionContext ctx, [Option("time", "Selected Time"), MinimumLength(5), MaximumLength(5)] string time, [Option("date", "Selected Date"), MinimumLength(5), MaximumLength(10)] string? date = null, [Option("timezone", "Selected Timezone")] string? timezone = null)
     {
         if (!IsTime(time))
         {
