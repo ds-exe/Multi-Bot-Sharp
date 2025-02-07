@@ -38,6 +38,13 @@
                 ServiceProvider = services
             });
 
+            var appCommands = discord.UseApplicationCommands(new ApplicationCommandsConfiguration()
+            {
+                ServiceProvider = services
+            });
+
+            appCommands.RegisterGuildCommands(Assembly.GetExecutingAssembly(), 945317275374870588);
+
             commands.RegisterCommands(Assembly.GetExecutingAssembly());
             commands.SetHelpFormatter<CustomFormatHelper>();
 

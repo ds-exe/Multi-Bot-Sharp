@@ -1,4 +1,7 @@
 ﻿global using DisCatSharp;
+global using DisCatSharp.ApplicationCommands;
+global using DisCatSharp.ApplicationCommands.Attributes;
+global using DisCatSharp.ApplicationCommands.Context;
 global using DisCatSharp.CommandsNext;
 global using DisCatSharp.CommandsNext.Attributes;
 global using DisCatSharp.CommandsNext.Converters;
