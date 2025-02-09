@@ -32,18 +32,6 @@
                 .AddSingleton(discord)
                 .BuildServiceProvider();
 
-            // TODO: Remove remaining CommandsNext module
-            //-------------------------------------------------------------------------
-            var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
-            {
-                StringPrefixes = new List<string> { config.Prefix },
-                ServiceProvider = services,
-                EnableDefaultHelp = false
-            });
-
-            commands.RegisterCommands(Assembly.GetExecutingAssembly());
-            //-------------------------------------------------------------------------
-
             var appCommands = discord.UseApplicationCommands(new ApplicationCommandsConfiguration()
             {
                 ServiceProvider = services,

@@ -5,15 +5,10 @@ namespace Multi_Bot_Sharp.Commands;
 public class TimeCommandModule : ApplicationCommandsModule
 {
     public required DatabaseService _databaseService;
-    private Dictionary<string, string> _timeZones;
 
+    private static Dictionary<string, string> _timeZones = ConfigHelper.GetJsonObject<Dictionary<string, string>>("timezones");
     private static readonly string _dateRegex = @"^(\d{2})/(\d{2})/?(\d{4})?$";
     private static readonly string _timeRegex = @"\d{2}:\d{2}";
-
-    public TimeCommandModule()
-    {
-        _timeZones = ConfigHelper.GetJsonObject<Dictionary<string, string>>("timezones");
-    }
 
     [SlashCommand("time", "Gets the given time embed.")]
     public async Task TimeCommand(InteractionContext ctx, [Option("time", "Selected Time"), MinimumLength(5), MaximumLength(5)] string time, [Option("date", "Selected Date"), MinimumLength(5), MaximumLength(10)] string? date = null, [Option("timezone", "Selected Timezone")] string? timezone = null)

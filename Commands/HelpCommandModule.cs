@@ -16,6 +16,7 @@ public class HelpCommandModule : ApplicationCommandsModule
         EmbedThumbnail = config.EmbedThumbnail ?? "";
     }
 
+    // Initial code based on DisCatSharp default help command
     [SlashCommand("help", "Displays command help")]
     public async Task DefaultHelpAsync(
         InteractionContext ctx,
@@ -61,9 +62,11 @@ public class HelpCommandModule : ApplicationCommandsModule
             Title = "Help",
             Description = $"{command.Mention}: {command.Description ?? "No description provided."}"
         }.AddField(new("Command is NSFW", command.IsNsfw.ToString()));
+        // Custom help start
         discordEmbed.Color = new DiscordColor("0099ff");
         discordEmbed.WithThumbnail(EmbedThumbnail);
         discordEmbed.WithFooter($"BOT owner @{User.Username}", User.AvatarUrl);
+        // Custom help end
         if (command.Options is not null)
         {
             var commandOptions = command.Options.ToList();
