@@ -10,7 +10,7 @@
         static async Task MainAsync()
         {
             var config = ConfigHelper.GetJsonObject<Config>("config");
-            if (config.Token == null || config.LavalinkPassword == null || config.Prefix == null)
+            if (config.Token == null || config.LavalinkPassword == null)
             {
                 return;
             };
@@ -52,16 +52,13 @@
 
             discord.MessageCreated += async (s, e) =>
             {
-                if (e.Message.Content == $"{config.Prefix}restart")
+                if (e.Message.Content == $"!restart")
                 {
                     await OwnerCommandModule.Restart(e.Message);
                 }
-                else
+                else if (e.Message.Content.StartsWith("!"))
                 {
-                    if (e.Message.Content.StartsWith(config.Prefix))
-                    {
-                        await e.Message.RespondAsync("Please use slash commands.");
-                    }
+                    await e.Message.RespondAsync("Please use slash commands.");
                 }
             };
 
