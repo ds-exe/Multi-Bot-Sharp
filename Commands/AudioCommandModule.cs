@@ -83,7 +83,7 @@ public class AudioCommandModule : ApplicationCommandsModule
             return;
         }
 
-        var queue = _queueService.AddQueue(guildPlayer.ChannelId, guildPlayer);
+        var queue = _queueService.AddQueue(guildPlayer.GuildId, guildPlayer);
 
         if (loadResult.LoadType == LavalinkLoadResultType.Track)
         {
@@ -174,7 +174,7 @@ public class AudioCommandModule : ApplicationCommandsModule
             return;
         }
 
-        _queueService.ClearQueue(guildPlayer.ChannelId);
+        _queueService.ClearQueue(guildPlayer.GuildId);
         await guildPlayer.StopAsync();
         await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
         {
@@ -206,8 +206,8 @@ public class AudioCommandModule : ApplicationCommandsModule
             return;
         }
 
-        _queueService.ClearQueue(guildPlayer.ChannelId);
-        _queueService.RemoveQueue(guildPlayer.ChannelId);
+        _queueService.ClearQueue(guildPlayer.GuildId);
+        _queueService.RemoveQueue(guildPlayer.GuildId);
         await guildPlayer.DisconnectAsync();
         await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
         {
@@ -238,7 +238,7 @@ public class AudioCommandModule : ApplicationCommandsModule
             });
             return;
         }
-        var user = _queueService.GetQueue(guildPlayer.ChannelId)?.GetCurrentTrackUser();
+        var user = _queueService.GetQueue(guildPlayer.GuildId)?.GetCurrentTrackUser();
         if (user == null)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
@@ -272,7 +272,7 @@ public class AudioCommandModule : ApplicationCommandsModule
         }
 
         var session = lavalink.ConnectedSessions.Values.First();
-        var channel = ctx.Member.VoiceState?.Channel;
+        var channel = ctx.Member?.VoiceState?.Channel;
 
         if (channel?.Type != ChannelType.Voice && channel?.Type != ChannelType.Stage)
         {
@@ -312,7 +312,7 @@ public class AudioCommandModule : ApplicationCommandsModule
             return;
         }
 
-        var queue = _queueService.GetQueue(guildPlayer.ChannelId);
+        var queue = _queueService.GetQueue(guildPlayer.GuildId);
 
         queue?.Shuffle();
     }

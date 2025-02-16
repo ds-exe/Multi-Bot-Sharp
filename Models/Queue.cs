@@ -72,7 +72,7 @@ public class Queue
         var next = GetNextQueueEntry();
         if (next == null)
         {
-            _queueService.SetLastPlayed(_player.ChannelId);
+            _queueService.SetLastPlayed(_player.GuildId);
             await Task.Delay(1000);
             StartTimeout();
             return;
@@ -87,13 +87,13 @@ public class Queue
     protected async void StartTimeout()
     {
         await Task.Delay(timeoutMinutes * 60 * 1000);
-        if (_queueService.GetLastPlayed(_player.ChannelId) <= DateTime.UtcNow.AddMinutes(-timeoutMinutes))
+        if (_queueService.GetLastPlayed(_player.GuildId) <= DateTime.UtcNow.AddMinutes(-timeoutMinutes))
         {
             if (_player.CurrentTrack == null)
             {
                 _player.TrackEnded -= Player_TrackEnded;
-                _queueService.RemoveLastPlayed(_player.ChannelId);
-                _queueService.RemoveQueue(_player.ChannelId);
+                _queueService.RemoveLastPlayed(_player.GuildId);
+                _queueService.RemoveQueue(_player.GuildId);
                 await _player.DisconnectAsync();
             }
         }

@@ -6,9 +6,9 @@ public class QueueService
 
     private static Dictionary<ulong, DateTime> playersLastPlayed = new Dictionary<ulong, DateTime>();
 
-    private Queue? GetQueueInternal(ulong queueId)
+    private Queue? GetQueueInternal(ulong guildId)
     {
-        var success = players.TryGetValue(queueId, out var queue);
+        var success = players.TryGetValue(guildId, out var queue);
 
         if (success)
         {
@@ -18,46 +18,46 @@ public class QueueService
         return null;
     }
 
-    public Queue? GetQueue(ulong queueId)
+    public Queue? GetQueue(ulong guildId)
     {
-        return GetQueueInternal(queueId);
+        return GetQueueInternal(guildId);
     }
 
-    public Queue AddQueue(ulong queueId, LavalinkGuildPlayer player)
+    public Queue AddQueue(ulong guildId, LavalinkGuildPlayer player)
     {
-        var queue = GetQueueInternal(queueId);
+        var queue = GetQueueInternal(guildId);
         if (queue != null)
         {
             return queue;
         }
 
         queue = new Queue(this, player);
-        players[queueId] = queue;
+        players[guildId] = queue;
         return queue;
     }
 
-    public void ClearQueue(ulong queueId)
+    public void ClearQueue(ulong guildId)
     {
-        var queue = GetQueue(queueId);
+        var queue = GetQueue(guildId);
         if (queue != null)
         {
             queue.ClearQueue();
         }
     }
 
-    public void RemoveQueue(ulong queueId)
+    public void RemoveQueue(ulong guildId)
     {
-        players.Remove(queueId);
+        players.Remove(guildId);
     }
 
-    public void SetLastPlayed(ulong queueId)
+    public void SetLastPlayed(ulong guildId)
     {
-        playersLastPlayed[queueId] = DateTime.UtcNow;
+        playersLastPlayed[guildId] = DateTime.UtcNow;
     }
 
-    public DateTime GetLastPlayed(ulong queueId)
+    public DateTime GetLastPlayed(ulong guildId)
     {
-        var success = playersLastPlayed.TryGetValue(queueId, out var lastPlayed);
+        var success = playersLastPlayed.TryGetValue(guildId, out var lastPlayed);
 
         if (success)
         {
@@ -67,8 +67,8 @@ public class QueueService
         return DateTime.MinValue;
     }
 
-    public void RemoveLastPlayed(ulong queueId)
+    public void RemoveLastPlayed(ulong guildId)
     {
-        playersLastPlayed.Remove(queueId);
+        playersLastPlayed.Remove(guildId);
     }
 }
