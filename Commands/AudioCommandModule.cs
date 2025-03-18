@@ -67,6 +67,17 @@ public class AudioCommandModule : ApplicationCommandsModule
         var type = LavalinkSearchType.Youtube;
         if (query.ToLower().Contains("http"))
         {
+            var match = Regex.IsMatch(query.ToLower(), @"^(https://youtu.be)|(https://open.spotify.com)|(https://www.youtube.com)");
+            if (!match)
+            {
+                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                {
+                    Content = $"Invalid url, please use youtu.be, www.youtube.com or open.spotify.com",
+                    IsEphemeral = true,
+                });
+                return;
+            }
+            if (query.ToLower().Contains("youtu.be"))
             type = LavalinkSearchType.Plain;
         }
 
