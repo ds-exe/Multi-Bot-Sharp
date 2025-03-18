@@ -77,7 +77,7 @@ public class AudioCommandModule : ApplicationCommandsModule
                 });
                 return;
             }
-            if (query.ToLower().Contains("youtu.be"))
+
             type = LavalinkSearchType.Plain;
         }
 
