@@ -49,6 +49,8 @@ public class AudioCommandModule : ApplicationCommandsModule
             return;
         }
 
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+
         var lavalink = ctx.Client.GetLavalink();
         var guildPlayer = lavalink.GetGuildPlayer(ctx.Guild);
         if (guildPlayer == null)
@@ -70,10 +72,9 @@ public class AudioCommandModule : ApplicationCommandsModule
             var match = Regex.IsMatch(query.ToLower(), @"^(https://youtu.be)|(https://open.spotify.com)|(https://www.youtube.com)");
             if (!match)
             {
-                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder()
                 {
                     Content = $"Invalid url, please use youtu.be, www.youtube.com or open.spotify.com",
-                    IsEphemeral = true,
                 });
                 return;
             }
@@ -86,10 +87,9 @@ public class AudioCommandModule : ApplicationCommandsModule
         // If something went wrong on Lavalink's end or it just couldn't find anything.
         if (loadResult.LoadType == LavalinkLoadResultType.Empty || loadResult.LoadType == LavalinkLoadResultType.Error)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder()
             {
                 Content = $"Track search failed for {query}.",
-                IsEphemeral = true,
             });
             return;
         }
@@ -272,14 +272,20 @@ public class AudioCommandModule : ApplicationCommandsModule
         var lavalink = ctx.Client.GetLavalink();
         if (!lavalink.ConnectedSessions.Any())
         {
-            await ctx.Channel.SendMessageAsync("Music connection error, attempting to reconnect player.");
+            var message = await ctx.Channel.SendMessageAsync("Music connection error, attempting to reconnect player.");
             await ConfigHelper.ConnectLavalink(lavalink);
 
             if (!lavalink.ConnectedSessions.Any())
             {
-                await ctx.Channel.SendMessageAsync("Music connection failed to restart.");
+                await message.ModifyAsync("Music connection failed to restart.");
+
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                {
+                    Content = "Playback failed.",
+                });
                 return false;
             }
+            await message.DeleteAsync();
         }
 
         var session = lavalink.ConnectedSessions.Values.First();
@@ -287,10 +293,9 @@ public class AudioCommandModule : ApplicationCommandsModule
 
         if (channel?.Type != ChannelType.Voice && channel?.Type != ChannelType.Stage)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder()
             {
                 Content = "Not a valid voice channel.",
-                IsEphemeral = true,
             });
             return false;
         }
@@ -330,13 +335,13 @@ public class AudioCommandModule : ApplicationCommandsModule
 
     protected async Task QueueTrack(InteractionContext ctx, Queue queue, LavalinkTrack track)
     {
-        await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(EmbedHelper.GetTrackAddedEmbed(track.Info, ctx.User)));
+        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(EmbedHelper.GetTrackAddedEmbed(track.Info, ctx.User)));
         queue.AddTrack(ctx.Channel, ctx.User, track);
     }
 
     protected async Task QueuePlaylist(InteractionContext ctx, Queue queue, LavalinkPlaylist playlist, string url)
     {
-        await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(EmbedHelper.GetPlaylistAddedEmbed(playlist, ctx.User, url)));
+        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(EmbedHelper.GetPlaylistAddedEmbed(playlist, ctx.User, url)));
         foreach (var track in playlist.Tracks)
         {
             queue.AddTrack(ctx.Channel, ctx.User, track);
