@@ -15,4 +15,6 @@ public class Config
     public ulong Owner { get; set; }
 
     public ulong[]? TestServer { get; set; }
+
+    public bool Debug { get; set; }
 }

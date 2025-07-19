@@ -6,5 +6,6 @@
   "EmbedThumbnail": "",
   "ReconnectIndefinitely": false,
   "Owner": 74968333413257216,
-  "EnableResinModule": true
+  "EnableResinModule": true,
+  "Debug":  false
 }

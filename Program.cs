@@ -15,12 +15,18 @@
                 return;
             };
 
+            var loggingLevel = Microsoft.Extensions.Logging.LogLevel.None;
+            if (config.Debug)
+            {
+                loggingLevel = Microsoft.Extensions.Logging.LogLevel.Information;
+            }
+
             var discord = new DiscordClient(new DiscordConfiguration()
             {
                 Token = config.Token,
                 TokenType = TokenType.Bot,
                 Intents = DiscordIntents.AllUnprivileged | DiscordIntents.MessageContent,
-                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.None,
+                MinimumLogLevel = loggingLevel,
                 ReconnectIndefinitely = config.ReconnectIndefinitely
             });
 
