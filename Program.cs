@@ -2,15 +2,15 @@
 {
     internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             MainAsync().GetAwaiter().GetResult();
         }
 
-        static async Task MainAsync()
+        private static async Task MainAsync()
         {
             var config = ConfigHelper.GetJsonObject<Config>("config");
-            if (config.Token == null || config.LavalinkPassword == null)
+            if (config.LavalinkPassword == null)
             {
                 return;
             };
@@ -56,13 +56,13 @@
                 appCommands.RegisterGlobalCommands(Assembly.GetExecutingAssembly());
             }
 
-            discord.MessageCreated += async (s, e) =>
+            discord.MessageCreated += async (_, e) =>
             {
                 if (e.Message.Content == $"!restart")
                 {
                     await OwnerCommandModule.Restart(e.Message);
                 }
-                else if (e.Message.Content.StartsWith("!"))
+                else if (e.Message.Content.StartsWith('!'))
                 {
                     await e.Message.RespondAsync("Please use slash commands.");
                 }
