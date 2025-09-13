@@ -69,6 +69,21 @@
             };
 
             await discord.ConnectAsync(new DiscordActivity($"/help", ActivityType.ListeningTo));
+            
+            if (config.TestServer != null)
+            {
+                foreach (var server in config.TestServer)
+                {
+                    // Remove Commands
+                    //await discord.BulkOverwriteGuildApplicationCommandsAsync(server, []);
+                }
+            }
+            else
+            {
+                // Remove Commands
+                //await discord.BulkOverwriteGlobalApplicationCommandsAsync([]);
+            }
+            
             await Task.Delay(15 * 1000);
 
             await ConfigHelper.ConnectLavalink(lavalink);
