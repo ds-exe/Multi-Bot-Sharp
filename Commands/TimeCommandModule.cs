@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 
 namespace Multi_Bot_Sharp.Commands;
 
@@ -7,7 +7,9 @@ public class TimeCommandModule : ApplicationCommandsModule
     public required DatabaseService _databaseService;
 
     private static Dictionary<string, string> _timeZones = ConfigHelper.GetJsonObject<Dictionary<string, string>>("timezones");
-    private static readonly string _dateRegex = @"^(\d{2})/(\d{2})/?(\d{4})?$";
+    private static readonly string _slashDateRegex = @"^(\d{1,2})/(\d{1,2})/?(\d{4})?$";
+    private static readonly string _dotDateRegex = @"^(\d{1,2})\.(\d{1,2})\.?(\d{4})?$";
+    private static readonly string _isoDateRegex = @"^(\d{4})-(\d{1,2})-(\d{1,2})$";
     private static readonly string _timeRegex = @"\d{2}:\d{2}";
 
     [SlashCommand("time", "Gets the given time embed.")]
@@ -165,7 +167,9 @@ public class TimeCommandModule : ApplicationCommandsModule
 
     private bool IsDate(string date)
     {
-        return Regex.Match(date, _dateRegex).Success;
+        return Regex.Match(date, _slashDateRegex).Success ||
+               Regex.Match(date, _dotDateRegex).Success ||
+               Regex.Match(date, _isoDateRegex).Success;
     }
 
     private bool IsTime(string time)
@@ -180,13 +184,28 @@ public class TimeCommandModule : ApplicationCommandsModule
         {
             return baseDate.ToString("dd/MM/yyyy");
         }
-        var matches = Regex.Match(date, _dateRegex);
-        if (!matches.Success)
+
+        var slashMatches = Regex.Match(date, _slashDateRegex);
+        if (slashMatches.Success)
         {
-            return null;
+            var year = slashMatches.Groups[3].Value;
+            return $"{slashMatches.Groups[1].Value.PadLeft(2, '0')}/{slashMatches.Groups[2].Value.PadLeft(2, '0')}/{(year != string.Empty ? year : baseDate.Year)}";
         }
-        var year = matches.Groups[3].Value;
-        return $"{matches.Groups[1].Value}/{matches.Groups[2].Value}/{(year != string.Empty ? year : baseDate.Year)}";
+
+        var dotMatches = Regex.Match(date, _dotDateRegex);
+        if (dotMatches.Success)
+        {
+            var year = dotMatches.Groups[3].Value;
+            return $"{dotMatches.Groups[1].Value.PadLeft(2, '0')}/{dotMatches.Groups[2].Value.PadLeft(2, '0')}/{(year != string.Empty ? year : baseDate.Year)}";
+        }
+
+        var isoMatches = Regex.Match(date, _isoDateRegex);
+        if (isoMatches.Success)
+        {
+            return $"{isoMatches.Groups[3].Value.PadLeft(2, '0')}/{isoMatches.Groups[2].Value.PadLeft(2, '0')}/{isoMatches.Groups[1].Value}";
+        }
+
+        return null;
     }
 
     private TimeZoneInfo? GetTimeZone(string? timezone, ulong uid)
