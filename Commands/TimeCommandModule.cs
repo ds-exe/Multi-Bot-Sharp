@@ -11,9 +11,10 @@ public class TimeCommandModule : ApplicationCommandsModule
     private static readonly string _dotDateRegex = @"^(\d{1,2})\.(\d{1,2})\.?(\d{4})?$";
     private static readonly string _isoDateRegex = @"^(\d{4})-(\d{1,2})-(\d{1,2})$";
     private static readonly string _timeRegex = @"\d{2}:\d{2}";
+    private static readonly string _timezoneRegex = @"^utc(\+|-)([0-9]{1,2})$";
 
     [SlashCommand("time", "Gets the given time embed.")]
-    public async Task TimeCommand(InteractionContext ctx, [Option("time", "Selected Time"), MinimumLength(5), MaximumLength(5)] string time, [Option("date", "Selected Date"), MinimumLength(5), MaximumLength(10)] string? date = null, [Option("timezone", "Selected Timezone")] string? timezone = null)
+    public async Task TimeCommand(InteractionContext ctx, [Option("time", "Selected Time"), MinimumLength(5), MaximumLength(5)] string time, [Option("date", "Selected Date"), MinimumLength(3), MaximumLength(10)] string? date = null, [Option("timezone", "Selected Timezone")] string? timezone = null)
     {
         if (!IsTime(time))
         {
@@ -37,7 +38,7 @@ public class TimeCommandModule : ApplicationCommandsModule
     }
 
     [SlashCommand("until", "Gets the given time embed.")]
-    public async Task UntilCommand(InteractionContext ctx, [Option("time", "Selected Time"), MinimumLength(5), MaximumLength(5)] string time, [Option("date", "Selected Date"), MinimumLength(5), MaximumLength(10)] string? date = null, [Option("timezone", "Selected Timezone")] string? timezone = null)
+    public async Task UntilCommand(InteractionContext ctx, [Option("time", "Selected Time"), MinimumLength(5), MaximumLength(5)] string time, [Option("date", "Selected Date"), MinimumLength(3), MaximumLength(10)] string? date = null, [Option("timezone", "Selected Timezone")] string? timezone = null)
     {
         if (!IsTime(time))
         {
@@ -223,20 +224,20 @@ public class TimeCommandModule : ApplicationCommandsModule
             }
 
             var success = _timeZones.TryGetValue(timezone.ToLower(), out var result);
-            if (!success || result == null)
+            if (success && result != null)
             {
-                var matches = Regex.Match(timezone.ToLower(), @"^utc(\+|-)([0-9]{1,2})$");
-                if (matches.Success)
-                {
-                    var sign = int.Parse(matches.Groups[2].Value) > 0 ? "-" : "+"; // Inverted due to Etc/GMT using reversed offsets
-                    var value = Math.Abs(int.Parse(matches.Groups[2].Value));
-                    return TZConvert.GetTimeZoneInfo($"Etc/GMT{sign}{value}");
-                }
-
+                return TZConvert.GetTimeZoneInfo(result);
+            }
+            
+            var matches = Regex.Match(timezone.ToLower(), _timezoneRegex);
+            if (!matches.Success)
+            {
                 return TZConvert.GetTimeZoneInfo(timezone);
             }
-
-            return TZConvert.GetTimeZoneInfo(result);
+            
+            var sign = int.Parse(matches.Groups[2].Value) > 0 ? "-" : "+"; // Inverted due to Etc/GMT using reversed offsets
+            var value = Math.Abs(int.Parse(matches.Groups[2].Value));
+            return TZConvert.GetTimeZoneInfo($"Etc/GMT{sign}{value}");
         }
         catch (TimeZoneNotFoundException)
         {

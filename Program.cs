@@ -13,7 +13,7 @@
             if (config.LavalinkPassword == null)
             {
                 return;
-            };
+            }
 
             var loggingLevel = Microsoft.Extensions.Logging.LogLevel.None;
             if (config.Debug)
