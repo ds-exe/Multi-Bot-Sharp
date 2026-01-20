@@ -235,7 +235,7 @@ public class TimeCommandModule : ApplicationCommandsModule
                 return TZConvert.GetTimeZoneInfo(timezone);
             }
             
-            var sign = int.Parse(matches.Groups[2].Value) > 0 ? "-" : "+"; // Inverted due to Etc/GMT using reversed offsets
+            var sign = matches.Groups[1].Value == "+" ? "-" : "+"; // Inverted due to Etc/GMT using reversed offsets
             var value = Math.Abs(int.Parse(matches.Groups[2].Value));
             return TZConvert.GetTimeZoneInfo($"Etc/GMT{sign}{value}");
         }
